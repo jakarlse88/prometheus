@@ -1,4 +1,4 @@
-namespace Technique
+namespace Technique.Infrastructure
 #nowarn "20"
 open System
 open System.Collections.Generic

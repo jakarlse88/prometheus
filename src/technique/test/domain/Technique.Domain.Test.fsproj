@@ -25,4 +25,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\domain\Technique.Domain.fsproj" />
+  </ItemGroup>
+
 </Project>
