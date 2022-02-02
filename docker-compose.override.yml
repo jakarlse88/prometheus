@@ -1,0 +1,78 @@
+services:
+  analysis-service:
+    container_name: analysis-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${ANALYSIS_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+
+  client-service:
+    container_name: client-service
+    ports:
+      - 8080:80
+
+  form-service:
+    container_name: form-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${FORM_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+
+  gateway-service:
+    container_name: gateway-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+
+  group-service:
+    container_name: group-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${GROUP_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+
+  media-service:
+    container_name: media-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${MEDIA_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+
+  technique-service:
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${TECHNIQUE_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools/bin/sqlcmd",
+          "-USA",
+          "-P${SA_PASSWORD}",
+          "-Q",
+          "SELECT 1"
+        ]
+    volumes:
+      - prometheus-sqldata:/var/opt/mssql
+      - prometheus-sqluser:/var/opt/sql
+
+  rabbitmq:
+    user: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_NODENAME=${RABBITMQ_NODENAME}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_EXT_PORT_1}:5672"
+      - "${RABBITMQ_EXT_PORT_2}:15672"
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/mnesia
+      - ./rabbitmq/logs/:/var/log/rabbitmq/
+
+networks:
+  local:
+    driver: bridge

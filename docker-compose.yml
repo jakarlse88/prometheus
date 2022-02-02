@@ -1,0 +1,83 @@
+services:
+  analysis-service:
+    container_name: analysis-service
+    build:
+      context: ./analysis
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  client-service:
+    container_name: client-service
+    build:
+      context: ./client
+
+  form-service:
+    container_name: form-service
+    build:
+      context: ./form
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ./gateway
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  group-service:
+    container_name: group-service
+    build:
+      context: ./group
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  media-service:
+    container_name: media-service
+    build:
+      context: ./media
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  technique-service:
+    container_name: technique-service
+    build:
+      context: technique/.
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+
+  rabbitmq:
+    hostname: rabbitmq
+    build:
+      context: ./rabbitmq
+
+volumes:
+  rabbitmq:
+  prometheus-sqldata:
+    external: false
+  prometheus-sqluser:
+    external: false 
+
+networks:
+  local:
