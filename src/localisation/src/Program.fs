@@ -8,7 +8,6 @@ open System.IO
 open System.Linq
 open System.Threading.Tasks
 open Localisation
-open Localisation.Query
 open Localisation.Type
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Builder
