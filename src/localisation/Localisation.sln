@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Localisation", "src\Localisation.fsproj", "{BA2AD53B-AF3B-4D05-AFD2-BFF1A6E8EB75}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Localisation.Test", "test\Localisation.Test.fsproj", "{CBFD1670-988D-448B-96AF-4B7A99765AB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA2AD53B-AF3B-4D05-AFD2-BFF1A6E8EB75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA2AD53B-AF3B-4D05-AFD2-BFF1A6E8EB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA2AD53B-AF3B-4D05-AFD2-BFF1A6E8EB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA2AD53B-AF3B-4D05-AFD2-BFF1A6E8EB75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBFD1670-988D-448B-96AF-4B7A99765AB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBFD1670-988D-448B-96AF-4B7A99765AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBFD1670-988D-448B-96AF-4B7A99765AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBFD1670-988D-448B-96AF-4B7A99765AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

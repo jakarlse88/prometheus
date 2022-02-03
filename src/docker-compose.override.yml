@@ -7,36 +7,51 @@ services:
 
   client-service:
     container_name: client-service
-    ports:
-      - 8080:80
 
   form-service:
     container_name: form-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${FORM_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${FORM_PORT_EXT}
 
   gateway-service:
     container_name: gateway-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${GATEWAY_PORT_EXT}
 
   group-service:
     container_name: group-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${GROUP_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${GROUP_PORT_EXT}
 
   media-service:
     container_name: media-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${MEDIA_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${MEDIA_PORT_EXT}
 
   technique-service:
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${TECHNIQUE_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${TECHNIQUE_PORT_EXT}
+
+  localisation-service:
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ConnectionStrings__DefaultConnection=Server=${DB_NAME},${SQL_SERVER_PORT_INT};Initial Catalog=${LOCALISATION_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${LOCALISATION_PORT_EXT}
 
   sql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -57,6 +72,8 @@ services:
     volumes:
       - prometheus-sqldata:/var/opt/mssql
       - prometheus-sqluser:/var/opt/sql
+    ports:
+      - ${SQL_PORT_INT}:${SQL_PORT_EXT}
 
   rabbitmq:
     user: rabbitmq

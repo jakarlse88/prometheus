@@ -64,6 +64,16 @@ services:
     networks:
       - local
 
+  localisation-service:
+    container_name: localisation-service
+    build:
+      context: localisation/.
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
   sql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
 
