@@ -7,6 +7,9 @@ open System.Collections.Generic
 open System.IO
 open System.Linq
 open System.Threading.Tasks
+open Localisation
+open Localisation.Query
+open Localisation.Type
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
@@ -22,16 +25,9 @@ module Program =
     [<EntryPoint>]
     let main args =
 
-        let builder = WebApplication.CreateBuilder(args)
-
-        builder.Services.AddControllers()
+        let builder = WebApplication.CreateBuilder( args )
 
         let app = builder.Build()
-
-        app.UseHttpsRedirection()
-
-        app.UseAuthorization()
-        app.MapControllers()
 
         app.Run()
 
