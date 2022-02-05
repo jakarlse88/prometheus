@@ -7,6 +7,8 @@ services:
 
   client-service:
     container_name: client-service
+    ports:
+      - "4200:80"
 
   form-service:
     container_name: form-service

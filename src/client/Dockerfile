@@ -1,17 +1,20 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
-WORKDIR /app
+### BUILD ###
+FROM node:14 AS build
+
+WORKDIR /usr/src/app
+
+COPY src/package.json src/yarn.lock ./
+
+RUN npm i -g @angular/cli
+RUN npm i --only=prod
 
 COPY [ "src/." , "./" ]
-COPY [ "nginx/nginx.conf" , "./" ]
 
-RUN dotnet restore "Client.csproj"
-RUN dotnet build "Client.csproj" -c Release -o /build
+RUN ng build --configuration production
 
-FROM build-env AS publish
-RUN dotnet publish "Client.csproj" -c Release -o /publish
-
-FROM nginx:alpine AS final
-WORKDIR /usr/share/nginx/html
-
-COPY --from=publish [ "/publish/wwwroot" , "/usr/local/webapp/nginx/html" ]
-COPY [ "nginx.conf" , "/etc/nginx/nginx.conf" ]
+### RUN ###
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=build [ "/usr/src/app/dist/prometheus/." , "/usr/local/webapp/nginx/html" ]
+COPY              [ "nginx/nginx.conf"               , "/etc/nginx" ]
+RUN ls -la /usr/local/webapp/nginx/html
