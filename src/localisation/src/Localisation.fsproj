@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Query.fs" />
+    <Compile Include="Domain.fs" />
+    <Compile Include="Context.fs" />
     <Compile Include="AddLanguageMutation.fs" />
     <Compile Include="DeleteLanguageMutation.fs" />
     <Compile Include="UpdateLanguageMutation.fs" />
@@ -14,7 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="FSharp.Data.GraphQL.Server" Version="1.0.7" />
+    <PackageReference Include="Giraffe" Version="5.0.0" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="12.6.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
   </ItemGroup>
 
 </Project>

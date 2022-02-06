@@ -1,8 +1,6 @@
-﻿module Localisation.Type
+﻿module Localisation.Domain
 
 open System
-open FSharp.Data.GraphQL
-open FSharp.Data.GraphQL.Types.SchemaDefinitions
 
 type SystemString = System.String
 
@@ -73,34 +71,43 @@ module NameString =
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-//      Aggregate and GraphQL object types
+//      Aggregate types
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
+/// Unverified input type
+type LanguageInput = {
+    LanguageId  : int
+    Name        : string
+    NameLocal   : string
+    
+    CreatedBy : int
+    CreatedOn : DateTime 
+    UpdatedBy : int
+    UpdatedOn : DateTime
+}
+
+/// Domain entity
+[<CLIMutable>]
 type Language = {
     LanguageId : LanguageId
-    Name       : string
-    NameLocal  : string
+    Name       : NameString
+    NameLocal  : NameString
     
-    Created    : DateTime
+    CreatedOn  : DateTime
     CreatedBy  : UserId
-    Updated    : DateTime
+    UpdatedOn  : DateTime
     UpdatedBy  : UserId
 }
 
-let LanguageType = Define.Object("Language", [
-    Define.Field( "languageId" , Int  , fun ctx l -> LanguageId.value l.LanguageId )
-    Define.Field( "created"    , Date , fun ctx l -> l.Created )
-    Define.Field( "createdBy"  , Int  , fun ctx l -> UserId.value l.CreatedBy)
-    Define.Field( "updated"    , Date , fun ctx l -> l.Updated )
-    Define.Field( "updatedBy"  , Int  , fun ctx l -> UserId.value l.UpdatedBy)
-] )
-
-// Root query
-let QueryRoot = Define.Object( "Query", [
-  Define.Field( "language", ListOf LanguageType, fun ctx () -> [] ) // <-- This is probably where we need to hook up Dapper, somehow  
-] )
-
-// Schema
-let schema = Schema( QueryRoot )
-
+/// Unverified intermediate DB type
+type UnverifiedLanguage = {
+    LanguageId  : int
+    Name        : string
+    NameLocal   : string
+    
+    CreatedBy : int
+    CreatedOn : DateTime 
+    UpdatedBy : int
+    UpdatedOn : DateTime
+}

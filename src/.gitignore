@@ -1,5 +1,5 @@
-*/**/.idea
-*/**/.vs
-*/**/.fake
-.ionide
+**/.idea/*
+**/.vs/*
+**/.fake/*
+**/.ionide/*
 .fake

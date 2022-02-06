@@ -4,11 +4,11 @@
     "Localisation": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchBrowser": false,
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionString": "Server=prom_sql_server,1433;Initial Catalog=LocalisationDB};User Id=sa;Password=Docker_@123"
       }
     }
   }
