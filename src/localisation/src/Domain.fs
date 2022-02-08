@@ -1,6 +1,7 @@
 ﻿module Localisation.Domain
 
 open System
+open System.Text.RegularExpressions
 
 type SystemString = System.String
 
@@ -10,65 +11,86 @@ type SystemString = System.String
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-type LanguageId = private LanguageId of int
-type NameId     = private NameId     of int
-type UserId     = private UserId     of int
-type NameString = private NameString of string
+type ValidationError =
+    | InvalidEntityIdError
+    | NameEmptyError      
+    | NameTooLongError
+    | NameContainsIllegalCharsError of string
+    | DatePrecedesMinimum
+    | DateSucceedsMaximum
 
-module LanguageId =
+type EntityId        = private LanguageId of int
+type ASCIIName       = private ASCIIName of string
+type ValidatedName   = private ValidatedName of string
+type ConstrainedDate = private ConstrainedDate of DateTime
+
+module EntityId =
     
     /// Extract value
     let value ( LanguageId id ) =
         id
     
     /// Constructor
-    let create value =
+    let create fieldName value =
         if value <= 0 then
-            None
+            Error ValidationError.InvalidEntityIdError 
         else
-            Some ( LanguageId value )
+            LanguageId value
+            |> Ok 
             
-module NameId =
+module ASCIIName =
     
     /// Extract value
-    let value ( NameId id ) =
-        id
-    
-    /// Constructor
-    let create value =
-        if value <= 0 then
-            None
-        else
-            Some ( NameId value )
-            
-module UserId =
-    
-    /// Extract value
-    let value ( UserId id ) =
-        id
-        
-    /// Constructor
-    let create value =
-        if value <= 0 then
-            None
-        else
-            Some ( UserId value )
-            
-module NameString =
-    
-    open System
-    
-    let value ( NameString str ) =
+    let value ( ASCIIName str ) =
         str
         
-    let create ( str : string ) =
+    /// Constructor
+    let create str =
         if String.IsNullOrWhiteSpace( str ) then
-            None
+            Error ValidationError.NameEmptyError 
         elif str.Length > 50 then
-            None
+            Error ValidationError.NameTooLongError
+        elif Regex.IsMatch( "^[a-zA-Z]+$", str ) then
+            "String value contains illegal characters; only alphabetical ASCII values are legal"
+            |> ValidationError.NameContainsIllegalCharsError
+            |> Error 
         else
-            Some ( NameString str )
+            Ok ( ASCIIName str )
 
+module ValidatedName =
+    
+    /// Extract value
+    let value ( ValidatedName str ) =
+        str
+        
+    /// Constructor
+    let create regEx illegalChars str =
+        if String.IsNullOrWhiteSpace( str ) then
+            Error ValidationError.NameEmptyError 
+        elif str.Length > 50 then
+            Error ValidationError.NameTooLongError
+        elif Regex.IsMatch( regEx, str ) then
+            sprintf "String value contains illegal characters; characters <%s> are not allowed" illegalChars
+            |> ValidationError.NameContainsIllegalCharsError
+            |> Error 
+        else
+            Ok ( ValidatedName str )
+            
+module ConstrainedDate =
+
+    /// Extract value
+    let value ( ConstrainedDate date ) =
+        date
+
+    /// Constructor
+    let createFromDateTime minD maxD date =
+        if date < minD then
+            Error ValidationError.DatePrecedesMinimum
+        elif date > maxD then
+            Error ValidationError.DateSucceedsMaximum
+        else    
+            Ok ( ConstrainedDate date )
+            
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //      Aggregate types
@@ -77,9 +99,9 @@ module NameString =
 
 /// Unverified input type
 type LanguageInput = {
-    LanguageId  : int
-    Name        : string
-    NameLocal   : string
+    LanguageId    : int
+    NameInvariant : string
+    NameLocal     : string
     
     CreatedBy : int
     CreatedOn : DateTime 
@@ -88,23 +110,22 @@ type LanguageInput = {
 }
 
 /// Domain entity
-[<CLIMutable>]
 type Language = {
-    LanguageId : LanguageId
-    Name       : NameString
-    NameLocal  : NameString
+    LanguageId    : EntityId
+    NameInvariant : ASCIIName
+    NameLocal     : ASCIIName
     
     CreatedOn  : DateTime
-    CreatedBy  : UserId
+    CreatedBy  : EntityId
     UpdatedOn  : DateTime
-    UpdatedBy  : UserId
+    UpdatedBy  : EntityId
 }
 
 /// Unverified intermediate DB type
 type UnverifiedLanguage = {
-    LanguageId  : int
-    Name        : string
-    NameLocal   : string
+    LanguageId    : int
+    NameInvariant : string
+    NameLocal     : string
     
     CreatedBy : int
     CreatedOn : DateTime 
