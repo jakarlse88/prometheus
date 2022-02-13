@@ -4,8 +4,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Domain.fs" />
-    <Compile Include="AddLanguageMutation.fs" />
+    <Compile Include="Infrastructure.fs" />
     <Compile Include="GetLanguageQuery.fs" />
+    <Compile Include="AddLanguageMutation.fs" />
     <Compile Include="DeleteLanguageMutation.fs" />
     <Compile Include="UpdateLanguageMutation.fs" />
     <Compile Include="Program.fs" />

@@ -24,7 +24,7 @@ module Program =
         services.AddGiraffe() |> ignore
         
     [<EntryPoint>]
-    let main args =
+    let main _ =
         Host.CreateDefaultBuilder()
             .ConfigureWebHostDefaults(
                 fun webHostBuilder ->

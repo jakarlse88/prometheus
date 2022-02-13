@@ -3,7 +3,7 @@
 open System
 open System.Text.RegularExpressions
 
-type SystemString = System.String
+type SystemString = String
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -11,18 +11,19 @@ type SystemString = System.String
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-type ValidationError =
-    | InvalidEntityIdError
-    | NameEmptyError      
-    | NameTooLongError
-    | NameContainsIllegalCharsError of string
-    | DatePrecedesMinimum
-    | DateSucceedsMaximum
 
-type EntityId        = private LanguageId of int
-type ASCIIName       = private ASCIIName of string
-type ValidatedName   = private ValidatedName of string
+type EntityId        = private LanguageId      of int
+type LanguageName    = private ASCIIName       of string
+type ValidatedName   = private ValidatedName   of string
 type ConstrainedDate = private ConstrainedDate of DateTime
+
+type ValidationError =
+    | InvalidEntityIdError          of string
+    | NameEmptyError               
+    | NameTooLongError             
+    | NameContainsIllegalCharsError of string
+    | DatePrecedesMinimum           of string
+    | DateSucceedsMaximum           of string
 
 module EntityId =
     
@@ -33,12 +34,14 @@ module EntityId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            Error ValidationError.InvalidEntityIdError 
+            sprintf "Invalid value for '%s' (%i); must be a positive integer value" fieldName value
+            |> InvalidEntityIdError 
+            |> Error  
         else
             LanguageId value
             |> Ok 
             
-module ASCIIName =
+module LanguageName =
     
     /// Extract value
     let value ( ASCIIName str ) =
@@ -47,49 +50,35 @@ module ASCIIName =
     /// Constructor
     let create str =
         if String.IsNullOrWhiteSpace( str ) then
-            Error ValidationError.NameEmptyError 
+            Error NameEmptyError 
         elif str.Length > 50 then
-            Error ValidationError.NameTooLongError
-        elif Regex.IsMatch( "^[a-zA-Z]+$", str ) then
-            "String value contains illegal characters; only alphabetical ASCII values are legal"
-            |> ValidationError.NameContainsIllegalCharsError
+            Error NameTooLongError
+        elif Regex.IsMatch( "^[a-zæøåA-ZÆØÅ]+$", str ) then
+            "String value contains illegal characters; only alphabetical characters are allowed."
+            |> NameContainsIllegalCharsError 
             |> Error 
         else
             Ok ( ASCIIName str )
 
-module ValidatedName =
-    
-    /// Extract value
-    let value ( ValidatedName str ) =
-        str
-        
-    /// Constructor
-    let create regEx illegalChars str =
-        if String.IsNullOrWhiteSpace( str ) then
-            Error ValidationError.NameEmptyError 
-        elif str.Length > 50 then
-            Error ValidationError.NameTooLongError
-        elif Regex.IsMatch( regEx, str ) then
-            sprintf "String value contains illegal characters; characters <%s> are not allowed" illegalChars
-            |> ValidationError.NameContainsIllegalCharsError
-            |> Error 
-        else
-            Ok ( ValidatedName str )
-            
 module ConstrainedDate =
-
+    
     /// Extract value
     let value ( ConstrainedDate date ) =
         date
 
     /// Constructor
-    let createFromDateTime minD maxD date =
-        if date < minD then
-            Error ValidationError.DatePrecedesMinimum
-        elif date > maxD then
-            Error ValidationError.DateSucceedsMaximum
-        else    
-            Ok ( ConstrainedDate date )
+    let createFromDateTime ( minD : DateTime ) ( maxD : DateTime ) fieldName ( date : DateTime ) =
+        if  date < minD then 
+            sprintf "%s cannot occur before %s (value was %s) " fieldName ( minD.ToShortDateString() ) ( date.ToShortDateString() )
+            |> DatePrecedesMinimum
+            |> Error 
+        elif date > maxD then 
+            sprintf "%s cannot occur after %s (value was %s) " fieldName ( maxD.ToShortDateString() ) ( date.ToShortDateString() )
+            |> DateSucceedsMaximum
+            |> Error
+        else
+            ConstrainedDate date 
+            |> Ok 
             
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -101,7 +90,6 @@ module ConstrainedDate =
 type LanguageInput = {
     LanguageId    : int
     NameInvariant : string
-    NameLocal     : string
     
     CreatedBy : int
     CreatedOn : DateTime 
@@ -112,8 +100,7 @@ type LanguageInput = {
 /// Domain entity
 type Language = {
     LanguageId    : EntityId
-    NameInvariant : ASCIIName
-    NameLocal     : ASCIIName
+    NameInvariant : LanguageName
     
     CreatedOn  : DateTime
     CreatedBy  : EntityId
@@ -125,7 +112,6 @@ type Language = {
 type UnverifiedLanguage = {
     LanguageId    : int
     NameInvariant : string
-    NameLocal     : string
     
     CreatedBy : int
     CreatedOn : DateTime 
