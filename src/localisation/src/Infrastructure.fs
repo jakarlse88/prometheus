@@ -11,18 +11,31 @@ type ValidationResult<'Success, 'Failure> =
     | Failure of 'Failure list
     
 /// Functions for the `ValidationResult` type
-[<AutoOpen>]
+[<RequireQualifiedAccess>]
 module ValidationResult =
 
-    let private bindValidationResult switchFn input =
+    let bind switchFn input =
         match input with
         | Success s -> switchFn s
         | Failure f -> Failure f
 
     let ( >>= ) switchFn input =
-        bindValidationResult switchFn input
+        bind switchFn input
 
     let ( >=> ) switchFnA switchFnB =
         match switchFnA with
         | Success s -> switchFnB s
         | Failure f -> Failure f
+
+[<AutoOpen>]
+module ValidationResultComputationExpression =
+
+    type ValidationResultBuilder() =
+
+        member __.Return( x ) =
+            Success x
+
+        member __.Bind( x, f ) =
+            ValidationResult.bind f x
+
+    let validationResult = new ValidationResultBuilder()

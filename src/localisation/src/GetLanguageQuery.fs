@@ -3,54 +3,65 @@
 open Dapper
 open Localisation.Domain
 open Microsoft.Data.SqlClient
-open System
 open System.Data
 
 let inline ( => ) a b = a, box b
 
-let private validateId input =
-    match EntityId.create "LanguageId" input with
-    | Ok id     -> Success id
-    | Error err -> Failure [ err ]
+type ValidationError =
+    | InvalidLanguageIdError          
+    | InvalidUserIdError          
+    | NameEmptyError               
+    | NameTooLongError             
+    | NameContainsIllegalCharsError of string
+    | DatePrecedesMinimum           of string
+    | DateSucceedsMaximum           of string
 
-let private validateLanguageName input = 
-    match LanguageName.create input with
-    | Ok name   -> Success name
-    | Error err -> Failure [ err ]
+// let private validateId input =
+//     match EntityId.create "LanguageId" input with
+//     | Ok id     -> Success id
+//     | Error err -> Failure [ err ]
 
-let private validateCreatedby input =
-    match EntityId.create "CreatedBy" input with
-    | Ok id     -> Success id
-    | Error err -> Failure [ err ]
+// let private validateLanguageName input = 
+//     match LanguageName.create input with
+//     | Ok name   -> Success name
+//     | Error err -> Failure [ err ]
 
-let private validateCreatedOn input =
-    match ConstrainedDate.createFromDateTime ( new DateTime(1, 1, 2022) ) ( DateTime.Today ) "createdOn" input with
-    | Ok date   -> Success date
-    | Error err -> Failure [ err ]
+// let private validateCreatedby input =
+//     match EntityId.create "CreatedBy" input with
+//     | Ok id     -> Success id
+//     | Error err -> Failure [ err ]
 
-let private validateUpdatedBy input =
-    match EntityId.create "UpdatedBy" input with
-    | Ok id     -> Success id
-    | Error err -> Failure [ err ]
+// let private validateCreatedOn input =
+//     match ConstrainedDate.createFromDateTime ( new DateTime(1, 1, 2022) ) ( DateTime.Today ) "createdOn" input with
+//     | Ok date   -> Success date
+//     | Error err -> Failure [ err ]
 
-let private validateUpdatedOn input =
-    match ConstrainedDate.createFromDateTime ( new DateTime(1, 1, 2022) ) ( DateTime.Today ) "createdOn" input with
-    | Ok date   -> Success date
-    | Error err -> Failure [ err ]
+// let private validateUpdatedBy input =
+//     match EntityId.create "UpdatedBy" input with
+//     | Ok id     -> Success id
+//     | Error err -> Failure [ err ]
 
-let private validateLanguage =
-    validateId            
-    >>= validateLanguageName    
-    >>= validateCreatedBy     
-    >>= validateCreatedOn     
-    >>= validateUpdatedBy     
-    >>= validateUpdatedOn
+// let private validateUpdatedOn input =
+//     match ConstrainedDate.createFromDateTime ( new DateTime(1, 1, 2022) ) ( DateTime.Today ) "createdOn" input with
+//     | Ok date   -> Success date
+//     | Error err -> Failure [ err ]
+
+// let private validateLanguage =
+//     validateId            
+//     >>= validateLanguageName    
+//     >>= validateCreatedBy     
+//     >>= validateCreatedOn     
+//     >>= validateUpdatedBy     
+//     >>= validateUpdatedOn
 
     
 
 let private mapToEntity ( unverifiedLang : UnverifiedLanguage ) =
-    result {
-        
+    validationResult {
+        let! id = 
+            unverifiedLang.LanguageId
+            |> EntityId.create 
+            |> 
     }
     // let {
     //        id        = LanguageId;

@@ -11,75 +11,91 @@ type SystemString = String
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-
-type EntityId        = private LanguageId      of int
-type LanguageName    = private ASCIIName       of string
+type LanguageId      = private LanguageId      of int
+type Userid          = private UserId          of int
+type LanguageName    = private LanguageName    of string
 type ValidatedName   = private ValidatedName   of string
 type ConstrainedDate = private ConstrainedDate of DateTime
 
-type ValidationError =
-    | InvalidEntityIdError          of string
-    | NameEmptyError               
-    | NameTooLongError             
-    | NameContainsIllegalCharsError of string
-    | DatePrecedesMinimum           of string
-    | DateSucceedsMaximum           of string
 
-module EntityId =
+module LanguageId =
     
     /// Extract value
     let value ( LanguageId id ) =
         id
     
     /// Constructor
-    let create fieldName value =
+    let create value =
         if value <= 0 then
-            sprintf "Invalid value for '%s' (%i); must be a positive integer value" fieldName value
-            |> InvalidEntityIdError 
-            |> Error  
+            sprintf "'LanguageId' must be greater than zero, but was '%d'" value
+            |> Error 
         else
             LanguageId value
             |> Ok 
             
+
+module UserId =
+    
+    /// Extract value
+    let value ( UserId id ) =
+        id
+    
+    /// Constructor
+    let create value =
+        if value <= 0 then
+            sprintf "'UserId' must be greater than zero, but was '%d'" value
+            |> Error
+        else
+            UserId value
+            |> Ok 
+            
+
 module LanguageName =
     
     /// Extract value
-    let value ( ASCIIName str ) =
+    let value ( LanguageName str ) =
         str
         
     /// Constructor
     let create str =
         if String.IsNullOrWhiteSpace( str ) then
-            Error NameEmptyError 
+            sprintf "'LanguageName' cannot not be empty"
+            |> Error 
         elif str.Length > 50 then
-            Error NameTooLongError
-        elif Regex.IsMatch( "^[a-zæøåA-ZÆØÅ]+$", str ) then
-            "String value contains illegal characters; only alphabetical characters are allowed."
-            |> NameContainsIllegalCharsError 
+            sprintf "'LanguageName' cannot be longer than 50 characters, "
+            |> ( + ) ( sprintf "but the provided valuewas '%i'" str.Length )
+            |> Error 
+        elif Regex.IsMatch( "^[a-zA-Z]+$", str ) then
+            "LanguageName can only contain ASCII characters"
             |> Error 
         else
-            Ok ( ASCIIName str )
+            Ok ( LanguageName str )
 
 module ConstrainedDate =
-    
+
     /// Extract value
     let value ( ConstrainedDate date ) =
         date
 
     /// Constructor
-    let createFromDateTime ( minD : DateTime ) ( maxD : DateTime ) fieldName ( date : DateTime ) =
-        if  date < minD then 
-            sprintf "%s cannot occur before %s (value was %s) " fieldName ( minD.ToShortDateString() ) ( date.ToShortDateString() )
-            |> DatePrecedesMinimum
+    let createFromDateTime ( minDate : DateTime ) ( maxDate : DateTime ) fieldName ( date : DateTime ) =
+        if  date < minDate then 
+            let minD' = minDate.ToShortDateString()
+            let date' = date.ToShortDateString()
+
+            sprintf "%s cannot occur before %s (value was %s)" fieldName minD' date'
             |> Error 
-        elif date > maxD then 
-            sprintf "%s cannot occur after %s (value was %s) " fieldName ( maxD.ToShortDateString() ) ( date.ToShortDateString() )
-            |> DateSucceedsMaximum
+        elif date > maxDate then 
+            let maxD' = maxDate.ToShortDateString()
+            let date' = date.ToShortDateString()
+
+            sprintf "%s cannot occur after %s (value was %s) " fieldName maxD' date'
             |> Error
         else
             ConstrainedDate date 
             |> Ok 
             
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //      Aggregate types
@@ -97,16 +113,18 @@ type LanguageInput = {
     UpdatedOn : DateTime
 }
 
+
 /// Domain entity
 type Language = {
-    LanguageId    : EntityId
+    LanguageId    : LanguageId
     NameInvariant : LanguageName
     
     CreatedOn  : DateTime
-    CreatedBy  : EntityId
+    CreatedBy  : LanguageId
     UpdatedOn  : DateTime
-    UpdatedBy  : EntityId
+    UpdatedBy  : LanguageId
 }
+
 
 /// Unverified intermediate DB type
 type UnverifiedLanguage = {
