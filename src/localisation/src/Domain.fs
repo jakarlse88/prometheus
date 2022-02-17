@@ -3,7 +3,6 @@
 open System
 open System.Text.RegularExpressions
 
-type SystemString = String
 
 // ---------------------------------------------------------------------------------------------------------------------
 //

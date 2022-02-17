@@ -1,41 +1,18 @@
-﻿namespace global
-
-// ----------------------------------------------------------------------------------------------------
-//
-//      The 'ValidationResult' is the same as the 'Result' type,
-//      but with a list of failures rather than a single value.
-//
-// ----------------------------------------------------------------------------------------------------
-type ValidationResult<'Success, 'Failure> =
-    | Success of 'Success
-    | Failure of 'Failure list
-    
-/// Functions for the `ValidationResult` type
-[<RequireQualifiedAccess>]
-module ValidationResult =
-
-    let bind switchFn input =
-        match input with
-        | Success s -> switchFn s
-        | Failure f -> Failure f
-
-    let ( >>= ) switchFn input =
-        bind switchFn input
-
-    let ( >=> ) switchFnA switchFnB =
-        match switchFnA with
-        | Success s -> switchFnB s
-        | Failure f -> Failure f
+﻿namespace Global
 
 [<AutoOpen>]
-module ValidationResultComputationExpression =
+module Result =
 
-    type ValidationResultBuilder() =
+    let mapError = Result.mapError
 
-        member __.Return( x ) =
-            Success x
+[<AutoOpen>]
+module ResultComputationExpression =
 
-        member __.Bind( x, f ) =
-            ValidationResult.bind f x
+    type ResultBuilder() =
+        member __.Return( x )   = Ok x 
+        member __.Bind( x, fn ) = Result.bind fn x
+        member __.Zero()        = __.Return ()
+        member __.Run( fn )     = fn()
+        member __.Delay( fn )   = fn
 
-    let validationResult = new ValidationResultBuilder()
+    let result = new ResultBuilder()
