@@ -1,18 +1,41 @@
-﻿namespace Global
+﻿namespace global
 
-[<AutoOpen>]
-module Result =
+type ValidationResult<'Success, 'Failure> =
+    | Success of 'Success
+    | Failure of 'Failure list
 
-    let mapError = Result.mapError
+[<RequireQualifiedAccess>]
+module ValidationResult =
+    
+    open System
 
-[<AutoOpen>]
-module ResultComputationExpression =
+    let retn x =
+        Success x
 
-    type ResultBuilder() =
-        member __.Return( x )   = Ok x 
-        member __.Bind( x, fn ) = Result.bind fn x
-        member __.Zero()        = __.Return ()
-        member __.Run( fn )     = fn()
-        member __.Delay( fn )   = fn
 
-    let result = new ResultBuilder()
+    let ofError err =
+        Failure [ err ]
+
+
+    let ofEx ( ex : Exception ) =
+        Failure [ ex.Message ]
+
+    
+    let map fn xResult =
+        match xResult with
+        | Failure errs -> Failure errs
+        | Success x    -> fn x |> retn
+
+
+    let bind fn xResult =
+        match xResult with
+        | Failure errs -> Failure errs
+        | Success x    -> fn x
+
+    
+    let apply fResult xResult =
+        match fResult, xResult with
+        | Success fn    , Success x     -> fn x |> retn
+        | Failure errs  , Success _     -> Failure errs
+        | Success _     , Failure errs  -> Failure errs
+        | Failure errs1 , Failure errs2 -> errs1 @ errs2 |> Failure

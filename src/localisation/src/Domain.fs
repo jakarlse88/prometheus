@@ -11,7 +11,7 @@ open System.Text.RegularExpressions
 // ---------------------------------------------------------------------------------------------------------------------
 
 type LanguageId      = private LanguageId      of int
-type Userid          = private UserId          of int
+type UserId          = private UserId          of int
 type LanguageName    = private LanguageName    of string
 type ValidatedName   = private ValidatedName   of string
 type ConstrainedDate = private ConstrainedDate of DateTime
@@ -64,8 +64,8 @@ module LanguageName =
             sprintf "'LanguageName' cannot be longer than 50 characters, "
             |> ( + ) ( sprintf "but the provided valuewas '%i'" str.Length )
             |> Error 
-        elif Regex.IsMatch( "^[a-zA-Z]+$", str ) then
-            "LanguageName can only contain ASCII characters"
+        elif Regex.IsMatch( "^[a-zA-Z()-]+$", str ) then
+            "LanguageName can only contain ASCII characters, parentheses, and dashes"
             |> Error 
         else
             Ok ( LanguageName str )
@@ -77,18 +77,18 @@ module ConstrainedDate =
         date
 
     /// Constructor
-    let createFromDateTime ( minDate : DateTime ) ( maxDate : DateTime ) fieldName ( date : DateTime ) =
+    let createFromDateTime ( minDate : DateTime ) ( maxDate : DateTime ) ( date : DateTime ) =
         if  date < minDate then 
             let minD' = minDate.ToShortDateString()
             let date' = date.ToShortDateString()
 
-            sprintf "%s cannot occur before %s (value was %s)" fieldName minD' date'
+            sprintf "Date cannot occur before %s (value was %s)" minD' date'
             |> Error 
         elif date > maxDate then 
             let maxD' = maxDate.ToShortDateString()
             let date' = date.ToShortDateString()
 
-            sprintf "%s cannot occur after %s (value was %s) " fieldName maxD' date'
+            sprintf "Date cannot occur after %s (value was %s) " maxD' date'
             |> Error
         else
             ConstrainedDate date 
@@ -103,35 +103,24 @@ module ConstrainedDate =
 
 /// Unverified input type
 type LanguageInput = {
-    LanguageId    : int
-    NameInvariant : string
+    LanguageId : int
+    Name       : string
     
     CreatedBy : int
     CreatedOn : DateTime 
     UpdatedBy : int
     UpdatedOn : DateTime
 }
-
 
 /// Domain entity
 type Language = {
-    LanguageId    : LanguageId
-    NameInvariant : LanguageName
+    LanguageId : LanguageId
+    Name       : LanguageName
     
-    CreatedOn  : DateTime
-    CreatedBy  : LanguageId
-    UpdatedOn  : DateTime
-    UpdatedBy  : LanguageId
+    CreatedOn  : ConstrainedDate
+    CreatedBy  : UserId
+    UpdatedOn  : ConstrainedDate
+    UpdatedBy  : UserId
 }
 
 
-/// Unverified intermediate DB type
-type UnverifiedLanguage = {
-    LanguageId    : int
-    NameInvariant : string
-    
-    CreatedBy : int
-    CreatedOn : DateTime 
-    UpdatedBy : int
-    UpdatedOn : DateTime
-}

@@ -3,6 +3,7 @@ namespace Localisation
 #nowarn "20"
 
 open Giraffe
+open Localisation.GetLanguageQuery
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.DependencyInjection
@@ -12,9 +13,11 @@ module Program =
     let exitCode = 0
     
     let webApp =
-        choose [
-            GET >=> route  "/ping"          >=> text "Ok"
-            GET >=> routef "/Language/%i" ( fun id -> getLanguageIdBy "" id )
+        GET >=> choose [
+            route  "/ping"          >=> Successful.OK "pong"
+            routef "/Language/%i"       getLanguageByIdHandler 
+
+            RequestErrors.NOT_FOUND "Resource not found"
         ]
         
     let configureApp ( app : IApplicationBuilder ) =
