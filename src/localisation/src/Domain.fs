@@ -20,6 +20,10 @@ type ConstrainedDate = private ConstrainedDate of DateTime
 
 module LanguageId =
     
+    /// Get a formatted creation error message 
+    let private getErrorMsg fieldName value =
+        sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+    
     /// Extract value
     let value ( LanguageId id ) =
         id
@@ -27,7 +31,7 @@ module LanguageId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+            getErrorMsg fieldName value
             |> Error 
         else
             LanguageId value
@@ -36,6 +40,10 @@ module LanguageId =
 
 module LanguageNameId =
     
+    /// Get a formatted creation error message
+    let private getErrorMsg fieldName value =
+        sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+    
     /// Extract value
     let value ( LanguageNameId id ) =
         id
@@ -43,7 +51,7 @@ module LanguageNameId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+            getErrorMsg fieldName value
             |> Error 
         else
             LanguageNameId value
@@ -52,6 +60,10 @@ module LanguageNameId =
             
 module UserId =
     
+    /// Get a formatted error creation message
+    let private getErrorMsg fieldName value =
+        sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+    
     /// Extract value
     let value ( UserId id ) =
         id
@@ -59,7 +71,7 @@ module UserId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
+            getErrorMsg fieldName value
             |> Error 
         else
             UserId value
@@ -68,6 +80,19 @@ module UserId =
 
 module ASCIIString =
     
+    /// Get a formatted error message for an empty value creation error
+    let private getValueEmptyErrorMsg fieldName =
+        sprintf "'%s' cannot not be empty" fieldName
+        
+    /// Get a formatted error message for a too long value creation error
+    let private getValueTooLongErrorMsg fieldName len =
+        sprintf "'%s' cannot be longer than 50 characters, " fieldName
+        |> ( + ) ( sprintf "but the provided value was '%i'" len )
+        
+    /// Get a formatted error message for an illegal character creation error
+    let private getIllegalCharErrorMsg =
+        "LanguageName can only contain ASCII characters, parentheses, and dashes"
+        
     /// Extract value
     let value ( ASCIIString str ) =
         str
@@ -75,41 +100,52 @@ module ASCIIString =
     /// Constructor
     let create fieldName str =
         if String.IsNullOrWhiteSpace( str ) then
-            sprintf "'%s' cannot not be empty" fieldName
+            getValueEmptyErrorMsg fieldName
             |> Error 
+
         elif str.Length > 50 then
-            sprintf "'%s' cannot be longer than 50 characters, " fieldName
-            |> ( + ) ( sprintf "but the provided value was '%i'" str.Length )
+            getValueTooLongErrorMsg fieldName str.Length
             |> Error 
+
         elif Regex.IsMatch( "^[a-zA-Z()-]+$", str ) then
-            "LanguageName can only contain ASCII characters, parentheses, and dashes"
-            |> Error 
+            Error getIllegalCharErrorMsg
+
         else
             Ok ( ASCIIString str )
 
 
 module ConstrainedDate =
 
+    /// Get a formatted error message for a date preceding the minimum date
+    let private getDatePrecedesMinDateErrorMsg ( minDate : DateTime ) ( actualDate : DateTime ) =
+        let minDate'    = minDate.ToShortDateString()
+        let actualDate' = actualDate.ToShortDateString()
+
+        sprintf "Date cannot occur before %s (value was %s)" minDate' actualDate'
+    
+    /// Get a formatted error message for a date succeeding the maximum date
+    let private getDateSucceedsMaxDateErrorMsg ( maxDate : DateTime ) ( actualDate : DateTime ) =
+        let maxDate'    = maxDate.ToShortDateString()
+        let actualDate' = actualDate.ToShortDateString()
+
+        sprintf "Date cannot occur after %s (value was %s) " maxDate' actualDate'
+    
     /// Extract value
     let value ( ConstrainedDate date ) =
         date
 
     /// Constructor
-    let createFromDateTime ( minDate : DateTime ) ( maxDate : DateTime ) ( date : DateTime ) =
-        if  date < minDate then 
-            let minD' = minDate.ToShortDateString()
-            let date' = date.ToShortDateString()
-
-            sprintf "Date cannot occur before %s (value was %s)" minD' date'
+    let createFromDateTime ( minDate : DateTime ) ( maxDate : DateTime ) ( actualDate : DateTime ) =
+        if  actualDate < minDate then 
+            getDatePrecedesMinDateErrorMsg minDate actualDate
             |> Error 
-        elif date > maxDate then 
-            let maxD' = maxDate.ToShortDateString()
-            let date' = date.ToShortDateString()
 
-            sprintf "Date cannot occur after %s (value was %s) " maxD' date'
+        elif actualDate > maxDate then 
+            getDateSucceedsMaxDateErrorMsg maxDate actualDate
             |> Error
+
         else
-            ConstrainedDate date 
+            ConstrainedDate actualDate 
             |> Ok 
             
 
