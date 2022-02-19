@@ -3,9 +3,11 @@
 type ValidationResult<'Success, 'Failure> =
     | Success of 'Success
     | Failure of 'Failure list
+    
 
 [<RequireQualifiedAccess>]
 module ValidationResult =
+    
     
     open System
 

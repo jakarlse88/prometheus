@@ -27,7 +27,7 @@ module LanguageId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
+            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
             |> Error 
         else
             LanguageId value
@@ -43,7 +43,7 @@ module LanguageNameId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
+            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
             |> Error 
         else
             LanguageNameId value
@@ -59,7 +59,7 @@ module UserId =
     /// Constructor
     let create fieldName value =
         if value <= 0 then
-            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
+            sprintf "'%s' must be greater than zero, but was '%i'" fieldName value
             |> Error 
         else
             UserId value
@@ -118,7 +118,6 @@ module ConstrainedDate =
 //      Aggregate types
 //
 // ---------------------------------------------------------------------------------------------------------------------
-
 
 type Language = {
     LanguageId : LanguageId

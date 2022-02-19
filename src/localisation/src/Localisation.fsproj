@@ -5,7 +5,7 @@
   <ItemGroup>
     <Compile Include="Domain.fs" />
     <Compile Include="Infrastructure.fs" />
-    <Compile Include="GetLanguageQuery.fs" />
+    <Compile Include="GetLanguageByIdQuery.fs" />
     <Compile Include="AddLanguageMutation.fs" />
     <Compile Include="DeleteLanguageMutation.fs" />
     <Compile Include="UpdateLanguageMutation.fs" />
