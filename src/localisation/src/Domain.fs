@@ -11,8 +11,9 @@ open System.Text.RegularExpressions
 // ---------------------------------------------------------------------------------------------------------------------
 
 type LanguageId      = private LanguageId      of int
+type LanguageNameId  = private LanguageNameId  of int
 type UserId          = private UserId          of int
-type LanguageName    = private LanguageName    of string
+type ASCIIString     = private ASCIIString     of string
 type ValidatedName   = private ValidatedName   of string
 type ConstrainedDate = private ConstrainedDate of DateTime
 
@@ -24,15 +25,31 @@ module LanguageId =
         id
     
     /// Constructor
-    let create value =
+    let create fieldName value =
         if value <= 0 then
-            sprintf "'LanguageId' must be greater than zero, but was '%d'" value
+            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
             |> Error 
         else
             LanguageId value
-            |> Ok 
+            |> Ok
             
 
+module LanguageNameId =
+    
+    /// Extract value
+    let value ( LanguageNameId id ) =
+        id
+    
+    /// Constructor
+    let create fieldName value =
+        if value <= 0 then
+            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
+            |> Error 
+        else
+            LanguageNameId value
+            |> Ok 
+            
+            
 module UserId =
     
     /// Extract value
@@ -40,35 +57,36 @@ module UserId =
         id
     
     /// Constructor
-    let create value =
+    let create fieldName value =
         if value <= 0 then
-            sprintf "'UserId' must be greater than zero, but was '%d'" value
-            |> Error
+            sprintf "'%s' must be greater than zero, but was '%d'" fieldName value
+            |> Error 
         else
             UserId value
             |> Ok 
-            
 
-module LanguageName =
+
+module ASCIIString =
     
     /// Extract value
-    let value ( LanguageName str ) =
+    let value ( ASCIIString str ) =
         str
         
     /// Constructor
-    let create str =
+    let create fieldName str =
         if String.IsNullOrWhiteSpace( str ) then
-            sprintf "'LanguageName' cannot not be empty"
+            sprintf "'%s' cannot not be empty" fieldName
             |> Error 
         elif str.Length > 50 then
-            sprintf "'LanguageName' cannot be longer than 50 characters, "
-            |> ( + ) ( sprintf "but the provided valuewas '%i'" str.Length )
+            sprintf "'%s' cannot be longer than 50 characters, " fieldName
+            |> ( + ) ( sprintf "but the provided value was '%i'" str.Length )
             |> Error 
         elif Regex.IsMatch( "^[a-zA-Z()-]+$", str ) then
             "LanguageName can only contain ASCII characters, parentheses, and dashes"
             |> Error 
         else
-            Ok ( LanguageName str )
+            Ok ( ASCIIString str )
+
 
 module ConstrainedDate =
 
@@ -101,21 +119,10 @@ module ConstrainedDate =
 //
 // ---------------------------------------------------------------------------------------------------------------------
 
-/// Unverified input type
-type LanguageInput = {
-    LanguageId : int
-    Name       : string
-    
-    CreatedBy : int
-    CreatedOn : DateTime 
-    UpdatedBy : int
-    UpdatedOn : DateTime
-}
 
-/// Domain entity
 type Language = {
     LanguageId : LanguageId
-    Name       : LanguageName
+    Name       : ASCIIString
     
     CreatedOn  : ConstrainedDate
     CreatedBy  : UserId

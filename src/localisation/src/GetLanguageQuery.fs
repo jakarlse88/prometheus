@@ -21,7 +21,6 @@ let minDate = new DateTime( DateTime.Now.Year, 1, 1 )
 let maxDate = DateTime.Today
 
 
-/// Unverified intermediate DB type
 type UnverifiedLanguage = {
     LanguageId : int
     Name       : string
@@ -33,23 +32,17 @@ type UnverifiedLanguage = {
 }
 
 
-type ValidationError =
-    | LanguageIdInvalidError    of string   
-    | InvalidUserIdError        of string
-    | LanguageNameInvalidError  of string
-    | CreatedByInvalidIdError   of string
-    | UpdatedByInvalidIdError   of string
-    | CreatedOnInvalidDateError of string
-    | UpdatedOnInvalidDateError of string
+type ErrorType =
+    | LanguageIdInvalidError     of string   
+    | LanguageNameIdInvalidError of string   
+    | InvalidUserIdError         of string
+    | LanguageNameInvalidError   of string
+    | CreatedByInvalidIdError    of string
+    | UpdatedByInvalidIdError    of string
+    | CreatedOnInvalidDateError  of string
+    | UpdatedOnInvalidDateError  of string
+    | SQLError                   of string
 
-
-type InfrastructureError = 
-    | SQLError of string
-
-
-type UnifiedError =
-    | ValidationError
-    | InfrastructureError
 
 type LanguageDto = {
     LanguageId : int
@@ -61,33 +54,29 @@ type LanguageDto = {
     UpdatedBy  : int
     }
 
-type LanguageErrorDto = {
-    Code    : string
-    Message : string list
-    }
 
 let verifyLanguageId input =
-    match LanguageId.create input with
+    match LanguageId.create "LanguageId" input with
     | Error err -> ( LanguageIdInvalidError err ) |> ValidationResult.ofError
-    | Ok id     -> Success id
+    | Ok    id  -> Success id
+    
 
-
-let verifyUserId input = 
-    match UserId.create input with
-    | Error err -> ( InvalidUserIdError err ) |> ValidationResult.ofError
-    | Ok id     -> Success id
+let verifyLanguageNameId input =
+    match LanguageNameId.create "LanguageNameId" input with
+    | Error err -> ( LanguageNameIdInvalidError err ) |> ValidationResult.ofError
+    | Ok    id  -> Success id
 
 
 let verifyLanguageName input =
-    match LanguageName.create input with
+    match ASCIIString.create "Name" input with
     | Error err -> ( LanguageNameInvalidError err ) |> ValidationResult.ofError
-    | Ok str    -> Success str
+    | Ok    str -> Success str
 
 
 let verifyCreatedBy input =
-    match UserId.create input with
+    match UserId.create "CreatedBy" input with
     | Error err -> ( CreatedByInvalidIdError err ) |> ValidationResult.ofError
-    | Ok id     -> Success id
+    | Ok    id  -> Success id
 
 
 let verifyCreatedOn input  =
@@ -97,7 +86,7 @@ let verifyCreatedOn input  =
 
 
 let verifyUpdatedBy input =
-    match UserId.create input with
+    match UserId.create "UpdatedBy" input with
     | Error err -> ( UpdatedByInvalidIdError err ) |> ValidationResult.ofError
     | Ok id     -> Success id
 
@@ -107,22 +96,24 @@ let verifyUpdatedOn input =
     | Error err -> ( UpdatedOnInvalidDateError err ) |> ValidationResult.ofError
     | Ok date   -> Success date
 
-let toDto ( language : Language ) = {
-    LanguageId =   LanguageId.value       language.LanguageId; 
-    Name       =   LanguageName.value     language.Name; 
-    CreatedBy  =   UserId.value           language.CreatedBy;
-    CreatedOn  = ( ConstrainedDate.value  language.CreatedOn ).ToIsoString(); 
-    UpdatedBy  =   UserId.value           language.UpdatedBy; 
-    UpdatedOn  = ( ConstrainedDate.value  language.UpdatedOn ).ToIsoString();
+
+let toLanguageDto ( language : Language ) = {
+    LanguageId =   LanguageId.value      language.LanguageId; 
+    Name       =   ASCIIString.value     language.Name 
+    CreatedBy  =   UserId.value          language.CreatedBy;
+    CreatedOn  = ( ConstrainedDate.value language.CreatedOn ).ToIsoString(); 
+    UpdatedBy  =   UserId.value          language.UpdatedBy; 
+    UpdatedOn  = ( ConstrainedDate.value language.UpdatedOn ).ToIsoString();
 }
 
-let toLanguageEntity id name createdBy createdOn updatedBy updatedOn : Language = {
-        LanguageId = id; 
-        Name       = name; 
-        CreatedBy  = createdBy;
-        CreatedOn  = createdOn; 
-        UpdatedBy  = updatedBy; 
-        UpdatedOn  = updatedOn;
+
+let toLanguageEntity id names createdBy createdOn updatedBy updatedOn : Language = {
+        LanguageId = id
+        Name      = names
+        CreatedBy  = createdBy
+        CreatedOn  = createdOn 
+        UpdatedBy  = updatedBy 
+        UpdatedOn  = updatedOn
     }
 
 
@@ -148,37 +139,37 @@ let validateLanguageEntityIntegrity ( input : UnverifiedLanguage ) =
 
 let private query =
     @"SELECT
-        [LanguageId], [Name], [NameLocal], [CreatedBy], [CreatedOn], [UpdatedBy], [UpdatedOn]
+        [LanguageId], [Name], [CreatedBy], [CreatedOn], [UpdatedBy], [UpdatedOn]
     FROM
         [dbo].[Language]
     WHERE
         [LanguageId] = @id
     "
     
+    
 let private queryParams id =
-    [
+    dict [
         "id" => id
     ]
 
 
 let private mapRowsToRecords ( reader : IDataReader ) : UnverifiedLanguage list =
-    let languageIdIndex     = reader.GetOrdinal "LanguageId"
-    let nameInvariantIndex  = reader.GetOrdinal "NameInvariant"
-    let createdByIndex      = reader.GetOrdinal "CreatedBy"
-    let createdOnIndex      = reader.GetOrdinal "CreatedOn"
-    let updatedByIndex      = reader.GetOrdinal "UpdatedBy"
-    let updatedOnIndex      = reader.GetOrdinal "UpdatedOn"
+    let languageIdIndex    = reader.GetOrdinal "LanguageId"
+    let nameInvariantIndex = reader.GetOrdinal "Name"
+    let createdByIndex     = reader.GetOrdinal "CreatedBy"
+    let createdOnIndex     = reader.GetOrdinal "CreatedOn"
+    let updatedByIndex     = reader.GetOrdinal "UpdatedBy"
+    let updatedOnIndex     = reader.GetOrdinal "UpdatedOn"
     
     [
         while reader.Read() do
             yield {
-                LanguageId    = reader.GetInt32  languageIdIndex
-                Name = reader.GetString nameInvariantIndex
-                    
-                CreatedBy = reader.GetInt32     createdByIndex
-                CreatedOn = reader.GetDateTime  createdOnIndex
-                UpdatedBy = reader.GetInt32     updatedByIndex
-                UpdatedOn = reader.GetDateTime  updatedOnIndex
+                LanguageId = reader.GetInt32    languageIdIndex
+                Name       = reader.GetString   nameInvariantIndex
+                CreatedBy  = reader.GetInt32    createdByIndex
+                CreatedOn  = reader.GetDateTime createdOnIndex
+                UpdatedBy  = reader.GetInt32    updatedByIndex
+                UpdatedOn  = reader.GetDateTime updatedOnIndex
             }
     ]
 
@@ -186,6 +177,7 @@ let private mapRowsToRecords ( reader : IDataReader ) : UnverifiedLanguage list 
 let private executeQuery ( connStr : string ) ( query : string ) data =
     async {
         let conn = new SqlConnection( connStr )
+        do! conn.OpenAsync() |> Async.AwaitTask
         
         use! reader = conn.ExecuteReaderAsync( query, data ) |> Async.AwaitTask
         
@@ -193,23 +185,20 @@ let private executeQuery ( connStr : string ) ( query : string ) data =
     }
 
 
-let getLanguageById ( connStr : string ) ( id : int ) : ValidationResult<Language, UnifiedError> =
-    try
-        let y = executeQuery connStr query ( queryParams id ) |> Async.RunSynchronously
-    
-        match y with
-        | Some  lang -> validateLanguageEntityIntegrity lang
-        | None  _    -> Failure err
-    with
-    | :? SqlException as ex -> 
-        Error ex.Message
-    
-
-let getLanguageByIdHandler ( id : int ) : HttpHandler =
+let public getLanguageByIdHandler ( id : int ) : HttpHandler =
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
-        let config  = ctx.GetService<IConfiguration>()
-        let langRes = getLanguageById ( config.GetConnectionString( "DefaultConnection" ) ) id
+        try
+            let connStr = ctx.GetService<IConfiguration>().GetValue("DefaultConnection")
+            let langRes = executeQuery connStr query ( queryParams id )
+                          |> Async.RunSynchronously
 
-        match langRes with
-        | Success lang -> Successful.OK ( toDto lang ) |> next ctx
-        | Failure err  -> err  |> toErrorDto |> RequestErrors.unprocessableEntity
+            match langRes with
+            | None _ ->
+                RequestErrors.NOT_FOUND ( sprintf "Could not find a 'Language' record with the identifier '%i'" id ) next ctx
+            | Some res ->
+                match validateLanguageEntityIntegrity res with
+                | Success lang -> Successful.OK            ( toLanguageDto lang ) next ctx
+                | Failure errs -> RequestErrors.BAD_REQUEST  errs         next ctx
+        with
+        | :? SqlException as ex -> 
+            ServerErrors.INTERNAL_ERROR ex.Message next ctx

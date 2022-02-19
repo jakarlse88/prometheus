@@ -13,12 +13,15 @@ module Program =
     let exitCode = 0
     
     let webApp =
-        GET >=> choose [
-            route  "/ping"          >=> Successful.OK "pong"
-            routef "/Language/%i"       getLanguageByIdHandler 
+        subRoute "/api"
+            (
+             GET >=> choose [
+                route  "/ping"          >=> Successful.OK "pong"
+                routef "/Language/%i"       getLanguageByIdHandler 
 
-            RequestErrors.NOT_FOUND "Resource not found"
-        ]
+                RequestErrors.NOT_FOUND "Could not find a route matching the specified route"
+            ]
+        )
         
     let configureApp ( app : IApplicationBuilder ) =
         app.UseGiraffe webApp

@@ -10,11 +10,12 @@
     <Compile Include="DeleteLanguageMutation.fs" />
     <Compile Include="UpdateLanguageMutation.fs" />
     <Compile Include="Program.fs" />
+    <Content Include="init.sql" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Giraffe" Version="5.0.0" />
-    <PackageReference Include="HotChocolate.AspNetCore" Version="12.6.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
   </ItemGroup>
 </Project>
