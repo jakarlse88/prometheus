@@ -54,22 +54,28 @@ module verifyLanguageIdTests  =
         }
     
     
+    let private getErrOrThrow ( errs : ErrorType list ) =
+        let getErrorMsg ( LanguageIdInvalidError input ) =
+                input
+    
+        let err = errs |> List.tryHead
+        
+        match err with
+        | Some x -> getErrorMsg x
+        | None _ -> failwith "Received empty error list"
+            
+    
     [<Property( Arbitrary=[| typeof<Negative> |])>]
     let ``verifyLanguageId returns error when input value is a negative int`` ( testId : int ) =
         
         // Arrange
-        let intGen = Arb.generate<int>
-        
-        let getValue ( LanguageIdInvalidError input ) =
-            input
-        
         let expected = sprintf "'LanguageId' must be greater than zero, but was '%i'" testId
         
         match verifyLanguageId testId with   
             
             | ValidationResult.Failure errs ->
-                let actual = errs |> List.head |> getValue
-                expected = actual
+                let actual = getErrOrThrow errs
+                expected   = actual
             
             | Success id   ->
                 sprintf "Expected 'Failure', was Success(%i)" ( LanguageId.value id )
@@ -80,18 +86,13 @@ module verifyLanguageIdTests  =
     let ``verifyLanguageId returns error when input value is equal to zero`` ( testId : int ) =
         
         // Arrange
-        let intGen = Arb.generate<int>
-        
-        let getValue ( LanguageIdInvalidError input ) =
-            input
-        
         let expected = sprintf "'LanguageId' must be greater than zero, but was '%i'" testId
         
         match verifyLanguageId testId with   
             
             | ValidationResult.Failure errs ->
-                let actual = errs |> List.head |> getValue
-                expected = actual
+                let actual = getErrOrThrow errs
+                expected   = actual
             
             | Success id   ->
                 sprintf "Expected 'Failure', was Success(%i)" ( LanguageId.value id )
@@ -102,19 +103,206 @@ module verifyLanguageIdTests  =
     let ``verifyLanguageId returns success when input is positive integer value`` ( testId : int ) =
         
         // Arrange
-        let intGen = Arb.generate<int>
-        
-        let getValue ( LanguageIdInvalidError input ) =
-            input
-        
         match verifyLanguageId testId with   
             
             | ValidationResult.Failure errs ->
-                let err = errs |> List.head |> getValue
+                let err = getErrOrThrow errs
                 
                 sprintf "Expected 'Success', was Failure: '%s'" err
                 |> failwith
             
             | Success id   ->
                 testId = ( LanguageId.value id )
+                
+
+                
+module verifyCreatedByTests  =
+    
+    let config = {
+        Config.Quick with
+            MaxTest = 100
+        }
+    
+    
+    let private getErrOrThrow ( errs : ErrorType list ) =
+        let getErrorMsg ( CreatedByInvalidIdError input ) =
+                input
+    
+        let err = errs |> List.tryHead
         
+        match err with
+        | Some x -> getErrorMsg x
+        | None _ -> failwith "Received empty error list"
+    
+    
+    [<Property( Arbitrary=[| typeof<Negative> |])>]
+    let ``verifyCreatedBy returns error when input value is a negative int`` ( testId : int ) =
+        
+        // Arrange
+        let expected = sprintf "'CreatedBy' must be greater than zero, but was '%i'" testId
+        
+        match verifyCreatedBy testId with   
+            
+            | ValidationResult.Failure errs ->
+                let actual = getErrOrThrow errs
+                expected   = actual
+            
+            | Success id   ->
+                sprintf "Expected 'Failure', was Success(%i)" ( UserId.value id )
+                |> failwith
+        
+    
+    [<Property( MaxTest = 1, Arbitrary=[| typeof<Zero> |])>]
+    let ``verifyCreatedBy returns error when input value is equal to zero`` ( testId : int ) =
+        
+        // Arrange
+        let expected = sprintf "'CreatedBy' must be greater than zero, but was '%i'" testId
+        
+        match verifyCreatedBy testId with   
+            
+            | ValidationResult.Failure errs ->
+                let actual = getErrOrThrow errs
+                expected   = actual
+            
+            | Success id   ->
+                sprintf "Expected 'Failure', was Success(%i)" ( UserId.value id )
+                |> failwith
+                
+                
+    [<Property( Arbitrary=[| typeof<Positive> |])>]
+    let ``verifyCreatedBy returns success when input is positive integer value`` ( testId : int ) =
+        
+        // Arrange
+        match verifyCreatedBy testId with   
+            
+            | ValidationResult.Failure errs ->
+                let err = getErrOrThrow errs
+                
+                sprintf "Expected 'Success', was Failure: '%s'" err
+                |> failwith
+            
+            | Success id   ->
+                testId = ( UserId.value id )
+                
+                
+module verifyUpdatedByTests  =
+    
+    let config = {
+        Config.Quick with
+            MaxTest = 100
+        }
+    
+    
+    let private getErrOrThrow ( errs : ErrorType list ) =
+        let getErrorMsg ( UpdatedByInvalidIdError input ) =
+                input
+    
+        let err = errs |> List.tryHead
+        
+        match err with
+        | Some x -> getErrorMsg x
+        | None _ -> failwith "Received empty error list"
+        
+    
+    [<Property( Arbitrary=[| typeof<Negative> |])>]
+    let ``verifyUpdatedBy returns error when input value is a negative int`` ( testId : int ) =
+        
+        // Arrange
+        let expected = sprintf "'UpdatedBy' must be greater than zero, but was '%i'" testId
+        
+        match verifyUpdatedBy testId with   
+            
+            | ValidationResult.Failure errs ->
+                let actual  = getErrOrThrow errs
+                expected    = actual
+            
+            | Success id   ->
+                sprintf "Expected 'Failure', was Success(%i)" ( UserId.value id )
+                |> failwith
+        
+    
+    [<Property( MaxTest = 1, Arbitrary=[| typeof<Zero> |])>]
+    let ``verifyUpdatedBy returns error when input value is equal to zero`` ( testId : int ) =
+        
+        // Arrange
+        let expected = sprintf "'UpdatedBy' must be greater than zero, but was '%i'" testId
+        
+        match verifyUpdatedBy testId with   
+            
+            | ValidationResult.Failure errs ->
+                let actual  = getErrOrThrow errs
+                expected    = actual
+            
+            | Success id   ->
+                sprintf "Expected 'Failure', was Success(%i)" ( UserId.value id )
+                |> failwith
+                
+                
+    [<Property( Arbitrary=[| typeof<Positive> |])>]
+    let ``verifyUpdatedBy returns success when input is positive integer value`` ( testId : int ) =
+        
+        match verifyUpdatedBy testId with   
+            
+        | ValidationResult.Failure errs ->
+            let err = getErrOrThrow errs 
+            
+            sprintf "Expected 'Success', was Failure: '%s'" err
+            |> failwith
+        
+        | Success id   ->
+            testId = ( UserId.value id )
+                
+module verifyLanguageNameTests =
+    
+    let config = {
+        Config.Quick with
+            MaxTest = 100
+        }
+    
+    
+    let private getErrOrThrow ( errs : ErrorType list ) =
+        let getErrorMsg ( LanguageNameInvalidError input ) =
+                input
+    
+        let err = errs |> List.tryHead
+        
+        match err with
+        | Some x -> getErrorMsg x
+        | None _ -> failwith "Received empty error list"
+    
+          
+            
+    [<Property( Arbitrary=[| typeof<Zero> |])>]
+    let ``VerifyLanguageName returns error when input is an empty string`` ( testInput : string ) =
+        
+        let expected = "'Name' cannot not be empty"
+        
+        match verifyLanguageName testInput with
+        
+        | ValidationResult.Failure errs ->
+            let actual = getErrOrThrow errs
+            
+            expected = actual
+        | Success x ->
+            sprintf "Expected 'Failure', was Success(%s)" ( ASCIIString.value x )
+            |> failwith
+            
+            
+    [<Property( Arbitrary=[| typeof<SizeOver50> |])>]
+    let ``VerifyLanguageName returns error when input is a string with length exceeding 50`` ( testInput : string ) =
+        
+        
+        
+        let expected = "'Name' cannot exceed 50 characters in length, "
+                        + sprintf "but the provided value had a length of '%i'" testInput.Length
+        
+        match verifyLanguageName testInput with
+        
+        | ValidationResult.Failure errs ->
+            let actual = getErrOrThrow errs
+            
+            expected = actual
+        | Success x ->
+            sprintf "Expected 'Failure', was Success(%s)" ( ASCIIString.value x )
+            |> failwith
+            

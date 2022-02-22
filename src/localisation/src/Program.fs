@@ -1,13 +1,20 @@
 namespace Localisation
 
+
 #nowarn "20"
 
+
 open Giraffe
+open Localisation.AddLanguageCommand
+open Localisation.DeleteLanguageCommand
+open Localisation.GetLanguageAllQuery
 open Localisation.GetLanguageQuery
+open Localisation.UpdateLanguageCommand
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
+
 
 module Program =
     let exitCode = 0
@@ -15,12 +22,28 @@ module Program =
     let webApp =
         subRoute "/api"
             (
-             GET >=> choose [
-                route  "/ping"          >=> Successful.OK "pong"
-                routef "/Language/%i"       getLanguageByIdHandler 
+             choose [
+                GET >=> choose [
+                    route  "/ping"          >=> Successful.OK "pong"
+                    routef "/Language/%i"       getLanguageByIdQueryHandler 
+                    route  "/Language"      >=> getLanguageAllQueryHandler 
 
+                ]   
+                
+                POST >=> choose [
+                    route "/Language" >=> addLanguageCommandHandler
+                ]
+
+                PUT >=> choose [
+                    routef "/Language/%i" updateLanguageCommandHandler
+                ]
+
+                DELETE >=> choose [
+                    routef "/Language/%i" deleteLanguageCommandHandler
+                ]
+                
                 RequestErrors.NOT_FOUND "Could not find a route matching the specified route"
-            ]
+             ]
         )
         
     let configureApp ( app : IApplicationBuilder ) =

@@ -86,12 +86,12 @@ module ASCIIString =
         
     /// Get a formatted error message for a too long value creation error
     let private getValueTooLongErrorMsg fieldName len =
-        sprintf "'%s' cannot be longer than 50 characters, " fieldName
-        |> ( + ) ( sprintf "but the provided value was '%i'" len )
+        sprintf "'%s' cannot exceed 50 characters in length, " fieldName
+        |> ( + ) ( sprintf "but the provided had a length of '%i'" len )
         
     /// Get a formatted error message for an illegal character creation error
-    let private getIllegalCharErrorMsg =
-        "LanguageName can only contain ASCII characters, parentheses, and dashes"
+    let private getIllegalCharErrorMsg fieldName =
+        sprintf "%s can only contain ASCII characters, parentheses, and dashes" fieldName
         
     /// Extract value
     let value ( ASCIIString str ) =
@@ -108,7 +108,8 @@ module ASCIIString =
             |> Error 
 
         elif Regex.IsMatch( "^[a-zA-Z()-]+$", str ) then
-            Error getIllegalCharErrorMsg
+            getIllegalCharErrorMsg fieldName
+            |> Error 
 
         else
             Ok ( ASCIIString str )

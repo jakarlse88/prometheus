@@ -5,8 +5,14 @@
     &lt;TestId&gt;xUnit::CBFD1670-988D-448B-96AF-4B7A99765AB1::net6.0::Localisation.Test.GetLanguageByIdQueryTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7541580d_002D59ff_002D4359_002D90ab_002Daf9428040f92/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="verifyLanguageId returns error when input value is a negative int" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=21c9c198_002D2b69_002D42e0_002Da480_002Dc4d8fd531859/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GetLanguageByIdQueryTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::CBFD1670-988D-448B-96AF-4B7A99765AB1::net6.0::Localisation.Test.GetLanguageByIdQueryTests+verifyLanguageIdTests.verifyLanguageId returns error when input value is a negative int&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::CBFD1670-988D-448B-96AF-4B7A99765AB1::net6.0::Localisation.Test.GetLanguageByIdQueryTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7541580d_002D59ff_002D4359_002D90ab_002Daf9428040f92/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="verifyLanguageId returns error when input value is a negative int" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::CBFD1670-988D-448B-96AF-4B7A99765AB1::net6.0::Localisation.Test.GetLanguageByIdQueryTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	</wpf:ResourceDictionary>

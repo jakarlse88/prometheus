@@ -61,12 +61,6 @@ let verifyLanguageId input =
     | Ok    id  -> Success id
     
 
-let verifyLanguageNameId input =
-    match LanguageNameId.create "LanguageNameId" input with
-    | Error err -> ( LanguageNameIdInvalidError err ) |> ValidationResult.ofError
-    | Ok    id  -> Success id
-
-
 let verifyLanguageName input =
     match ASCIIString.create "Name" input with
     | Error err -> ( LanguageNameInvalidError err ) |> ValidationResult.ofError
@@ -185,7 +179,7 @@ let private executeQuery ( connStr : string ) ( query : string ) data =
     }
 
 
-let public getLanguageByIdHandler ( id : int ) : HttpHandler =
+let public getLanguageByIdQueryHandler ( id : int ) : HttpHandler =
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
         try
             let connStr = ctx.GetService<IConfiguration>().GetValue("DefaultConnection")
@@ -198,7 +192,7 @@ let public getLanguageByIdHandler ( id : int ) : HttpHandler =
             | Some res ->
                 match validateLanguageEntityIntegrity res with
                 | Success lang -> Successful.OK            ( toLanguageDto lang ) next ctx
-                | Failure errs -> RequestErrors.BAD_REQUEST  errs         next ctx
+                | Failure errs -> RequestErrors.BAD_REQUEST  errs                 next ctx
         with
         | :? SqlException as ex -> 
             ServerErrors.INTERNAL_ERROR ex.Message next ctx
