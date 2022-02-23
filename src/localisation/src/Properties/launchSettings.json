@@ -8,7 +8,7 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionString": "Server=prom_sql_server,1433;Initial Catalog=LocalisationDB};User Id=sa;Password=Docker_@123"
+        "ConnectionString": "Server=prom_sql_server,1433;Initial Catalog=LocalisationDB;User Id=sa;Password=Docker_@123"
       }
     }
   }

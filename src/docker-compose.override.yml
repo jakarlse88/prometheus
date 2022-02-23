@@ -1,9 +1,19 @@
 services:
+  identity-service:
+    container_name: identity-service
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${IDENTITY_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${IDENTITY_PORT_EXT}
+
   analysis-service:
     container_name: analysis-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${ANALYSIS_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
+    ports:
+      - ${DEFAULT_PORT_INTERNAL}:${ANALYSIS_PORT_EXT}
 
   client-service:
     container_name: client-service

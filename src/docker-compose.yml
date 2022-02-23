@@ -1,4 +1,14 @@
 services:
+  identity-service:
+    container_name: identity-service
+    build:
+      context: ./identity
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - local
+
   analysis-service:
     container_name: analysis-service
     build:
@@ -74,7 +84,7 @@ services:
     networks:
       - local
 
-  prometheus-db-referential:
+  db-referential:
     image: mcr.microsoft.com/mssql/server:2019-latest
 
   rabbitmq:

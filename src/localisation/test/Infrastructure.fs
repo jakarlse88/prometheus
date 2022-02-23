@@ -26,7 +26,7 @@ type Zero =
     static member String() =
         Arb.Default.String()
         |> Arb.filter
-               ( fun str -> str = null or str = "\0" )
+               ( fun str -> str = null || str = "\0" )
 
 
 type SizeOver50 =
