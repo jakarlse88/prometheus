@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NbThemeModule, NbLayoutModule } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
+import { AuthHttpConfigModule } from './auth/auth-http-config.module';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { NbEvaIconsModule } from '@nebular/eva-icons';
     BrowserAnimationsModule,
     NbThemeModule.forRoot({ name: 'default' }),
     NbLayoutModule,
-    NbEvaIconsModule
+    NbEvaIconsModule,
+    AuthHttpConfigModule
   ],
   providers: [],
   bootstrap: [AppComponent]
