@@ -1,8 +1,11 @@
 using Duende.IdentityServer;
 using Identity.Data;
 using Identity.Models;
+using IdentityModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 namespace Identity;
@@ -20,6 +23,12 @@ internal static class HostingExtensions
                .AddEntityFrameworkStores<ApplicationDbContext>()
                .AddDefaultTokenProviders();
 
+        builder.Services.AddCors( opt  => opt.AddPolicy( "Default"
+                                                       , builder =>
+                                                             builder.AllowAnyHeader()
+                                                                    .AllowAnyMethod()
+                                                                    .AllowAnyOrigin() ) );
+
         builder.Services
                .AddIdentityServer( options =>
                                    {
@@ -36,7 +45,31 @@ internal static class HostingExtensions
                .AddInMemoryClients( Config.Clients )
                .AddAspNetIdentity<ApplicationUser>();
 
-        builder.Services.AddAuthentication();
+        builder.Services
+               .AddAuthentication( opt =>
+                                   {
+                                       opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                                       opt.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
+                                   } )
+               .AddJwtBearer()
+               .AddOpenIdConnect( "oidc"
+                                , "Prometheus"
+                                , opt =>
+                                  {
+                                      opt.SignInScheme  = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                                      opt.SignOutScheme = IdentityServerConstants.SignoutScheme;
+                                      opt.SaveTokens    = true;
+                                      opt.Authority     = "https://prometheus.demo";
+                                      opt.ResponseType  = "code";
+                                      opt.ClientId      = "prometheus_client";
+                                      opt.UsePkce       = true;
+
+                                      opt.TokenValidationParameters = new TokenValidationParameters
+                                                                      {
+                                                                          NameClaimType = "name"
+                                                                        , RoleClaimType = "role"
+                                                                      };
+                                  } );
 
         return builder.Build();
     }
@@ -52,6 +85,7 @@ internal static class HostingExtensions
 
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCors( "Default" );
         app.UseIdentityServer();
         app.UseAuthorization();
 

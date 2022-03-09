@@ -1,27 +1,26 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent }                   from './app.component';
+import { AppRoutingModule }               from './app-routing.module';
+import { AuthHttpConfigModule }           from './auth/auth-http-config.module';
+import { BrowserAnimationsModule }        from '@angular/platform-browser/animations';
+import { BrowserModule }                  from '@angular/platform-browser';
+import { NbEvaIconsModule }               from '@nebular/eva-icons';
+import { NbThemeModule, NbLayoutModule }  from '@nebular/theme';
+import { NgModule }                       from '@angular/core';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NbThemeModule, NbLayoutModule } from '@nebular/theme';
-import { NbEvaIconsModule } from '@nebular/eva-icons';
-import { AuthHttpConfigModule } from './auth/auth-http-config.module';
-
-@NgModule({
+@NgModule( {
   declarations: [
     AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    NbThemeModule.forRoot({ name: 'default' }),
-    NbLayoutModule,
-    NbEvaIconsModule,
-    AuthHttpConfigModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+  ] 
+  , imports: [
+    AppRoutingModule
+  , AuthHttpConfigModule
+  , BrowserAnimationsModule
+  , BrowserModule
+  , NbEvaIconsModule
+  , NbLayoutModule
+  , NbThemeModule.forRoot( { name: 'default' } )
+  ]
+  , providers: []
+  , bootstrap: [ AppComponent ]
+} )
 export class AppModule { }

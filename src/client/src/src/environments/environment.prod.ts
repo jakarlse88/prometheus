@@ -1,4 +1,4 @@
 export const environment = {
-  production: true
-  , oidcUrl: 'https://localhost:5000'
+    production : true
+  , authority  : 'https://localhost:5000'
 };
