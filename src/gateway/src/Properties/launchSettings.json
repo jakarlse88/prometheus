@@ -4,7 +4,7 @@
     "Gateway": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": ,
+      "launchBrowser": false,
       "launchUrl": "",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {

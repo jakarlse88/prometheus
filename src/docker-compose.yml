@@ -1,20 +1,11 @@
 services:
-  identity-service:
-    container_name: identity-service
-    build:
-      context: ./identity
-    depends_on:
-      - sql-server
-      - rabbitmq
-    networks:
-      - local
 
   analysis-service:
     container_name: analysis-service
     build:
       context: ./analysis
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -29,7 +20,7 @@ services:
     build:
       context: ./form
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -39,7 +30,7 @@ services:
     build:
       context: ./gateway
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -49,7 +40,7 @@ services:
     build:
       context: ./group
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -59,7 +50,7 @@ services:
     build:
       context: ./media
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -69,7 +60,7 @@ services:
     build:
       context: technique/.
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
@@ -79,12 +70,12 @@ services:
     build:
       context: localisation/.
     depends_on:
-      - sql-server
+      - sql-db
       - rabbitmq
     networks:
       - local
 
-  db-referential:
+  sql-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
 
   rabbitmq:

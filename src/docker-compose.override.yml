@@ -1,11 +1,4 @@
 services:
-  identity-service:
-    container_name: identity-service
-    environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
-      - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${IDENTITY_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
-    ports:
-      - ${DEFAULT_PORT_INTERNAL}:${IDENTITY_PORT_EXT}
 
   analysis-service:
     container_name: analysis-service
@@ -13,7 +6,7 @@ services:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${ANALYSIS_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${ANALYSIS_PORT_EXT}
+      - ${ANALYSIS_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   client-service:
     container_name: client-service
@@ -26,14 +19,14 @@ services:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${FORM_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${FORM_PORT_EXT}
+      - ${FORM_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   gateway-service:
     container_name: gateway-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${GATEWAY_PORT_EXT}
+      - ${GATEWAY_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   group-service:
     container_name: group-service
@@ -41,7 +34,7 @@ services:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${GROUP_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${GROUP_PORT_EXT}
+      - ${GROUP_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   media-service:
     container_name: media-service
@@ -49,23 +42,23 @@ services:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${MEDIA_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${MEDIA_PORT_EXT}
+      - ${MEDIA_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   technique-service:
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${TECHNIQUE_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${TECHNIQUE_PORT_EXT}
+      - ${TECHNIQUE_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   localisation-service:
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${LOCALISATION_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
-      - ${DEFAULT_PORT_INTERNAL}:${LOCALISATION_PORT_EXT}
+      - ${LOCALISATION_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
-  db-referential:
+  sql-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       - ACCEPT_EULA=Y

@@ -1,6 +1,6 @@
 import { AppComponent }                   from './app.component';
 import { AppRoutingModule }               from './app-routing.module';
-import { AuthHttpConfigModule }           from './auth/auth-http-config.module';
+import { AuthModule }                     from '@auth0/auth0-angular';
 import { BrowserAnimationsModule }        from '@angular/platform-browser/animations';
 import { BrowserModule }                  from '@angular/platform-browser';
 import { NbEvaIconsModule }               from '@nebular/eva-icons';
@@ -13,7 +13,8 @@ import { NgModule }                       from '@angular/core';
   ] 
   , imports: [
     AppRoutingModule
-  , AuthHttpConfigModule
+  , AuthModule.forRoot( { domain   : 'soprom.eu.auth0.com'
+                        , clientId : 'ePJBJoRCKnZWwpls6gNSJRT9LdzOoOKP' } )
   , BrowserAnimationsModule
   , BrowserModule
   , NbEvaIconsModule

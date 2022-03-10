@@ -1,0 +1,125 @@
+﻿{
+  "Routes"     : [
+    {
+      "Key"                    : "Analysis",
+      "UpstreamPathTemplate"   : "/api/Analysis",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Analysis",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "analysis-service",
+          "Port" : 80
+        }
+      ]
+    },
+    {
+      "Key"                    : "Technique",
+      "UpstreamPathTemplate"   : "/api/Technique",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",  
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Technique",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "technique-service",
+          "Port" : 80
+        }
+      ]
+    },
+    {
+      "Key"                    : "Form",
+      "UpstreamPathTemplate"   : "/api/Form",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Form",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "form-service",
+          "Port" : 80
+        }
+      ]
+    },
+    {
+      "Key"                    : "Media",
+      "UpstreamPathTemplate"   : "/api/Media",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Media",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "media-service",
+          "Port" : 80
+        }
+      ]
+    },
+    {
+      "Key"                    : "Localisation",
+      "UpstreamPathTemplate"   : "/api/Localisation",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Localisation",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "localisation-service",
+          "Port" : 80
+        }
+      ]
+    },
+    {
+      "Key"                    : "Group",
+      "UpstreamPathTemplate"   : "/api/Group",
+      "UpstreamHttpMethod"     : [
+        "POST",
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate" : "/api/Group",
+      "DownstreamScheme"       : "http",
+      "DownstreamHostAndPorts" : [
+        {
+          "Host" : "group-service",
+          "Port" : 80
+        }
+      ]
+    }
+  ],
+  "Aggregates" : [
+    {
+      "RouteKey" : [
+        "Analysis",
+        "Technique",
+        "Form",
+        "Media",
+        "Localisation",
+        "Group"
+      ],
+      "UpstreamPathTemplate" : "/api/Services/Ping"
+    }
+  ]
+}
