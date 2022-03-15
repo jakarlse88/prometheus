@@ -4,6 +4,7 @@ services:
     container_name: analysis-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${ANALYSIS_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${ANALYSIS_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -17,6 +18,7 @@ services:
     container_name: form-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${FORM_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${FORM_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -25,6 +27,7 @@ services:
     container_name: gateway-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
     ports:
       - ${GATEWAY_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
@@ -32,6 +35,7 @@ services:
     container_name: group-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${GROUP_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${GROUP_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -40,6 +44,7 @@ services:
     container_name: media-service
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${MEDIA_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${MEDIA_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -47,6 +52,7 @@ services:
   technique-service:
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${TECHNIQUE_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${TECHNIQUE_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -54,6 +60,7 @@ services:
   localisation-service:
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${LOCALISATION_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
       - ${LOCALISATION_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
