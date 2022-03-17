@@ -1,5 +1,18 @@
 ﻿{
+  "GlobalConfiguration" : {
+    "RequestIdKey" : "X-Correlation-ID",
+    "BaseUrl": "http://localhost:8004"
+  },
   "Routes"     : [
+    {
+      "Key"                    : "User",
+      "UpstreamPathTemplate"   : "/api/User/{id}",
+      "UpstreamHttpMethod"     : [
+        "GET"
+      ],
+      "DownstreamPathTemplate" : "soprom.eu.auth0.com/api/v2/users/{id}",
+      "DownstreamScheme"       : "https"
+    },
     {
       "Key"                    : "Analysis",
       "UpstreamPathTemplate"   : "/api/Analysis",
@@ -16,14 +29,18 @@
           "Host" : "analysis-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "analysis-cache"
+      }
     },
     {
       "Key"                    : "Technique",
       "UpstreamPathTemplate"   : "/api/Technique",
       "UpstreamHttpMethod"     : [
         "POST",
-        "GET",  
+        "GET",
         "PUT",
         "DELETE"
       ],
@@ -34,7 +51,11 @@
           "Host" : "technique-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "technique-cache"
+      }
     },
     {
       "Key"                    : "Form",
@@ -52,7 +73,11 @@
           "Host" : "form-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "form-cache"
+      }
     },
     {
       "Key"                    : "Media",
@@ -70,7 +95,11 @@
           "Host" : "media-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "media-cache"
+      }
     },
     {
       "Key"                    : "Localisation",
@@ -88,7 +117,11 @@
           "Host" : "localisation-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "localisation-cache"
+      }
     },
     {
       "Key"                    : "Group",
@@ -106,12 +139,16 @@
           "Host" : "group-service",
           "Port" : 80
         }
-      ]
+      ],
+      "FileCacheOptions"       : {
+        "TtlSeconds" : 30,
+        "Region"     : "group-cache"
+      }
     }
   ],
   "Aggregates" : [
     {
-      "RouteKey" : [
+      "RouteKey"             : [
         "Analysis",
         "Technique",
         "Form",

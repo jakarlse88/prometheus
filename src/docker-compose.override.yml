@@ -1,7 +1,15 @@
 services:
 
+  user-service:
+    container_name: user-service-DEBUG
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
+    ports:
+      - ${USER_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
+
   analysis-service:
-    container_name: analysis-service
+    container_name: analysis-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -10,12 +18,12 @@ services:
       - ${ANALYSIS_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   client-service:
-    container_name: client-service
+    container_name: client-service-DEBUG
     ports:
       - "4200:80"
 
   form-service:
-    container_name: form-service
+    container_name: form-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -24,7 +32,7 @@ services:
       - ${FORM_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   gateway-service:
-    container_name: gateway-service
+    container_name: gateway-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -32,7 +40,7 @@ services:
       - ${GATEWAY_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   group-service:
-    container_name: group-service
+    container_name: group-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -41,7 +49,7 @@ services:
       - ${GROUP_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   media-service:
-    container_name: media-service
+    container_name: media-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -50,6 +58,7 @@ services:
       - ${MEDIA_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   technique-service:
+    container_name: technique-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
@@ -58,6 +67,7 @@ services:
       - ${TECHNIQUE_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
 
   localisation-service:
+    container_name: localisation-service-DEBUG
     environment:
       - "ASPNETCORE_ENVIRONMENT=Development"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"

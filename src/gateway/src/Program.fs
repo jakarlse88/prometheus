@@ -4,20 +4,22 @@ namespace Gateway
 
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
+open Microsoft.IdentityModel.Tokens
+open Ocelot.Cache.CacheManager
 open Ocelot.DependencyInjection
 open Ocelot.Middleware
-open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Http
-open Microsoft.Extensions.Hosting
+open System.Security.Claims
 
 module Program =
-    open System.Threading.Tasks
+    
     let exitCode = 0
 
+    
     [<EntryPoint>]
+    
     let main args =
 
         let builder = WebApplication.CreateBuilder(args)
@@ -32,15 +34,21 @@ module Program =
                                     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme |> ignore
                                     opt.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme |> ignore )
             .AddJwtBearer( fun opt ->
-                                opt.Authority = "https://soprom.eu.auth0.com/" |> ignore
-                                opt.Audience  = "http://localhost:8004"        |> ignore )
+                                opt.Authority = builder.Configuration["Auth0:Domain"]                   |> ignore
+                                opt.Audience  = builder.Configuration["Auth0:Audience"]                 |> ignore
+                                opt.TokenValidationParameters = TokenValidationParameters( )            |> ignore
+                                opt.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier |> ignore )
         
-        builder.Services.AddOcelot( builder.Configuration )
+        builder.Services
+            .AddOcelot( builder.Configuration )
+            .AddCacheManager( fun x -> x.WithDictionaryHandle() |> ignore )
         
         let app = builder.Build()
 
         app.UseHttpsRedirection()
 
+        app.UseAuthentication()
+        
         app.UseAuthorization()
 
         app.UseRouting()

@@ -1,5 +1,15 @@
 services:
 
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user
+    depends_on:
+      - rabbitmq
+      - gateway-service
+    networks:
+      - local
+
   analysis-service:
     container_name: analysis-service
     build:

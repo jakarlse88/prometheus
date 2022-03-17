@@ -27,7 +27,6 @@ module Program =
                     route  "/ping"          >=> Successful.OK "pong"
                     routef "/Language/%i"       getLanguageByIdQueryHandler 
                     route  "/Language"      >=> getLanguageAllQueryHandler 
-
                 ]   
                 
                 POST >=> choose [
@@ -42,7 +41,7 @@ module Program =
                     routef "/Language/%i" deleteLanguageCommandHandler
                 ]
                 
-                RequestErrors.NOT_FOUND "Could not find a route matching the specified route"
+                RequestErrors.NOT_FOUND "Could not find a matching route"
              ]
         )
         

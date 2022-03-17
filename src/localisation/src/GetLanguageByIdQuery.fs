@@ -4,11 +4,12 @@
 open Dapper
 open Giraffe
 open Localisation.Domain
-open System
-open System.Data
 open Microsoft.AspNetCore.Http
 open Microsoft.Data.SqlClient
 open Microsoft.Extensions.Configuration
+open System
+open System.ComponentModel.DataAnnotations
+open System.Data
 
 
 let inline ( => ) a b = 
@@ -53,6 +54,12 @@ type LanguageDto = {
     UpdatedOn  : string
     UpdatedBy  : int
     }
+
+
+let validateInput input =
+    match LanguageId.create "input" input with
+    | Error err  -> ( LanguageIdInvalidError err ) |> ValidationResult.ofError
+    | Ok    id   -> Success id
 
 
 let verifyLanguageId input =
@@ -179,20 +186,24 @@ let private executeQuery ( connStr : string ) ( query : string ) data =
     }
 
 
-let public getLanguageByIdQueryHandler ( id : int ) : HttpHandler =
+let public getLanguageByIdQueryHandler ( input : int ) : HttpHandler =
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
-        try
-            let connStr = ctx.GetService<IConfiguration>().GetValue("DefaultConnection")
-            let langRes = executeQuery connStr query ( queryParams id )
-                          |> Async.RunSynchronously
+        match validateInput input with
+        | Success id ->  
+            try
+                let connStr = ctx.GetService<IConfiguration>().GetValue("DefaultConnection")
+                let langRes = executeQuery connStr query ( queryParams id )
+                              |> Async.RunSynchronously
 
-            match langRes with
-            | None _ ->
-                RequestErrors.NOT_FOUND ( sprintf "Could not find a 'Language' record with the identifier '%i'" id ) next ctx
-            | Some res ->
-                match validateLanguageEntityIntegrity res with
-                | Success lang -> Successful.OK            ( toLanguageDto lang ) next ctx
-                | Failure errs -> RequestErrors.BAD_REQUEST  errs                 next ctx
-        with
-        | :? SqlException as ex -> 
-            ServerErrors.INTERNAL_ERROR ex.Message next ctx
+                match langRes with
+                | None _ ->
+                    RequestErrors.NOT_FOUND ( sprintf "Could not find a 'Language' record with the identifier '%i'" ( LanguageId.value id ) ) next ctx
+                | Some res ->
+                    match validateLanguageEntityIntegrity res with
+                    | Success lang -> Successful.OK            ( toLanguageDto lang ) next ctx
+                    | Failure errs -> RequestErrors.BAD_REQUEST  errs                 next ctx
+            with
+            | :? SqlException as ex -> 
+                ServerErrors.INTERNAL_ERROR ex.Message next ctx
+        | Failure errs ->
+            RequestErrors.BAD_REQUEST errs next ctx

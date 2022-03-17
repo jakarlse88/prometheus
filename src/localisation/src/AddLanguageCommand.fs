@@ -1,11 +1,11 @@
 ﻿module private Localisation.AddLanguageCommand
 
-open System
+open Dapper
 open Giraffe
-open Giraffe.HttpStatusCodeHandlers
 open Localisation.Domain
 open Microsoft.AspNetCore.Http
-open System.Net.Http
+open Microsoft.Data.SqlClient
+open System
 
 
 let ( => ) a b =
@@ -18,12 +18,10 @@ let ( => ) a b =
 //
 // --------------------------------------------------------------------------------
 
-type InputModel = {
+type public InputModel = {
     Name      : string
     CreatedBy : int
-    CreatedOn : DateTime
     UpdatedBy : int
-    UpdatedOn : DateTime
 }
 
 
@@ -35,11 +33,6 @@ type InputModel = {
 
 type ValidatedInput = {
     Name : ASCIIString
-    
-    CreatedBy : UserId
-    CreatedOn : ConstrainedDate
-    UpdatedBy : UserId
-    UpdatedOn : ConstrainedDate
 }
 
 
@@ -62,35 +55,19 @@ type UnifiedError =
     | SQLError
 
 
-type ValidateName =
-    string -> ValidationResult<ASCIIString, ValidationError>
-    
+let validateName input =
+    match ASCIIString.create "Name" input with
+    | Error err  -> ( LanguageNameInvalidError err ) |> ValidationResult.ofError
+    | Ok    name -> Success name
 
-type ValidateCreatedBy =
-    int -> ValidationResult<UserId, ValidationError>
-    
 
-type ValidateCreatedOn =
-    DateTime -> ValidationResult<ConstrainedDate, ValidationError>
-    
+let validateCreatedBy input =
+    match int.create "CreatedBy" input with
+    | Error err  -> ( InvalidUserIdError err ) |> ValidationResult.ofError
+    | Ok    id   -> Success id
 
-type ValidateUpdatedBy =
-    int -> ValidationResult<UserId, ValidationError>
-    
-    
-type ValidateUpdatedOn =
-    DateTime -> ValidationResult<ConstrainedDate, ValidationError>
-    
-    
-type ValidateInput =
-    InputModel
-        -> ValidateName
-        -> ValidateCreatedBy
-        -> ValidateCreatedOn
-        -> ValidateUpdatedBy
-        -> ValidateUpdatedOn
-        -> ValidationResult<ValidatedInput, ValidationError>
-
+let validateInput ( input : InputModel ) =
+    validateName input.Name
 
 // --------------------------------------------------------------------------------
 //
@@ -98,15 +75,25 @@ type ValidateInput =
 //
 // --------------------------------------------------------------------------------    
 
-type ExtantLanguageId = ExtantLanguageId of LanguageId
+type UpdatedLanguageId = UpdatedLanguageId of LanguageId
 
 
 type Payload = {
-    LanguageId : ExtantLanguageId
+    LanguageId : UpdatedLanguageId
 }
 
 type LanguageCreatedEvent = LanguageCreatedEvent of Payload
 
+
+let executeQuery connStr query data =
+    async {
+        let conn = new SqlConnection( connStr )
+        do! conn.OpenAsync() |> Async.AwaitTask
+        
+        let! id = conn.ExecuteAsync( query, data ) |> Async.AwaitTask
+        
+        return id
+    }
     
 // --------------------------------------------------------------------------------
 //
@@ -114,6 +101,8 @@ type LanguageCreatedEvent = LanguageCreatedEvent of Payload
 //
 // --------------------------------------------------------------------------------
 
-let public addLanguageCommandHandler : HttpHandler =
+let public addLanguageCommandHandler ( input : InputModel ) : HttpHandler =
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
-        Successful.OK "POST" next ctx
+        match validateInput input with
+        | Success id ->
+            
