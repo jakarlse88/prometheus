@@ -48,8 +48,10 @@ module Program =
     let configureApp ( app : IApplicationBuilder ) =
         app.UseGiraffe webApp
         
+        
     let configureServices ( services : IServiceCollection ) =
         services.AddGiraffe() |> ignore
+        
         
     [<EntryPoint>]
     let main _ =

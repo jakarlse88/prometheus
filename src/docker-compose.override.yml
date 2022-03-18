@@ -3,7 +3,7 @@ services:
   user-service:
     container_name: user-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
     ports:
       - ${USER_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -11,7 +11,7 @@ services:
   analysis-service:
     container_name: analysis-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${ANALYSIS_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
@@ -25,7 +25,7 @@ services:
   form-service:
     container_name: form-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${FORM_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
@@ -34,7 +34,7 @@ services:
   gateway-service:
     container_name: gateway-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
     ports:
       - ${GATEWAY_PORT_EXT}:${DEFAULT_PORT_INTERNAL}
@@ -42,7 +42,7 @@ services:
   group-service:
     container_name: group-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${GROUP_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
@@ -51,7 +51,7 @@ services:
   media-service:
     container_name: media-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${MEDIA_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
@@ -60,7 +60,7 @@ services:
   technique-service:
     container_name: technique-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${TECHNIQUE_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
@@ -69,7 +69,7 @@ services:
   localisation-service:
     container_name: localisation-service-DEBUG
     environment:
-      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_ENVIRONMENT=DockerDev"
       - "ASPNETCORE_URLS=http://+:${DEFAULT_PORT_INTERNAL}"
       - "DefaultConnection=Server=${DB_NAME},${SQL_PORT_INT};Initial Catalog=${LOCALISATION_DB_INITIAL_CAT};User Id=${DB_USER};Password=${SA_PASSWORD}"
     ports:
