@@ -179,8 +179,6 @@ let userQueryHandler ( userId : int ) : HttpHandler =
                         ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
                         ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
 
-        
-        
         match auth' with
         | Error _ -> ServerErrors.INTERNAL_ERROR "Couldn't auhorise with Auth0" next ctx
         | Ok    x -> Successful.OK               x next ctx
