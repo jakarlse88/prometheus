@@ -3,6 +3,7 @@
 
 open Giraffe
 open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Configuration
 open Polly
 open System
@@ -10,7 +11,7 @@ open System.Net
 open System.Net.Http
 open System.Net.Http.Json
 open Thoth.Json.Net
-open Microsoft.Extensions.Caching.Memory
+open UserService.Types
 
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -56,106 +57,74 @@ let waitAndRetryPolicy =
         ]
 
 
-
-// ---------------------------------------------------------------------------------------------------------------------------
-//
-//      Error types
-//
-// ---------------------------------------------------------------------------------------------------------------------------
-
-type UserQueryError =
-    | NetworkError      of string
-    | AuthError         of string
-    | DeserializeError  of string
-
-
-type Auth0Response = {
-    access_token : string
-    expires_in   : int
-    scope        : string
-    token_type   : string
-}
-
-
-// ---------------------------------------------------------------------------------------------------------------------------
-//
-//      Workflow-specific types
-//
-// ---------------------------------------------------------------------------------------------------------------------------
-
-module Auth0Response =
-    
-    let decoder : Decoder<Auth0Response> =
-        Decode.object ( fun get ->
-            {
-                access_token = get.Required.Raw ( Decode.field "access_token" Decode.string )
-                expires_in   = get.Required.Raw ( Decode.field "expires_in"   Decode.int )
-                scope        = get.Required.Raw ( Decode.field "scope"        Decode.string )
-                token_type   = get.Required.Raw ( Decode.field "token_type"   Decode.string )
-            }
-        )   
-
-
 // ---------------------------------------------------------------------------------------------------------------------------
 //
 //      Functions
 //
 // ---------------------------------------------------------------------------------------------------------------------------
 
-
-let deserialize<'T> ( input : HttpResponseMessage ) ( decoder : Decoder<'T> ): Result<'T, UserQueryError> =
+let deserialize<'T> ( input : HttpResponseMessage ) ( decoder : Decoder<'T> ): Result<'T, DomainError> =
     Decode.fromString decoder ( input.Content.ReadAsStringAsync().Result )
     |> Result.mapError ( fun _ -> DeserializeError "Failed to deserialize response" )
     |> Result.bind     ( fun x -> Ok x )
     
 
-let executeHttpGetReq ( url : string ) : Async<Result<HttpResponseMessage, UserQueryError>> =
+let httpResponseToResult ( response : HttpResponseMessage ) =
+    match response.StatusCode with
+    | HttpStatusCode.OK           -> Ok    ( response )
+    | HttpStatusCode.Unauthorized -> Error ( AuthError    response.ReasonPhrase )
+    | _                           -> Error ( NetworkError response.ReasonPhrase )
+
+
+let execHttpGetReq ( url : string ) : Async<Result<HttpResponseMessage, DomainError>> =
     async {
         try 
             use client = new HttpClient()
 
-            let! res = client.GetAsync( url ) |> Async.AwaitTask 
+            let! res = waitAndRetryPolicy.Execute ( fun _ -> client.GetAsync( url ) |> Async.AwaitTask ) 
 
-            return Ok ( res )
+            return httpResponseToResult res
         with
         | :? Exception as ex ->
             return Error ( NetworkError ex.Message )
     } 
 
-let executeHttpPostReq ( url : string ) ( body : Object ) : Async<Result<HttpResponseMessage, UserQueryError>> =
+
+let execHttpPostReq( url : string ) ( body : Object ) : Async<Result<HttpResponseMessage, DomainError>> =
     async {
-        use client = new HttpClient()
+        try
+            use client = new HttpClient()
 
-        let! res = client.PostAsJsonAsync( url, body ) |> Async.AwaitTask
-
-        return res
+            let! res = waitAndRetryPolicy.Execute ( fun _ -> client.PostAsJsonAsync( url, body ) |> Async.AwaitTask )
+                        
+            return httpResponseToResult res
+        with
+        | :? Exception as ex ->
+            return Error ( NetworkError ex.Message )
     } 
 
 
-let getAuthToken ( config : IConfiguration ) : Async<Result<Auth0Response, string>> =
+let getAuthToken ( config : IConfiguration ) : Async<Result<Auth0TokenResponse, DomainError>> =
     async {
-        use client = new HttpClient()
-        
         let body = {| grant_type    = "client_credentials" 
                       client_id     = config[ "Auth0:ClientId" ] 
                       client_secret = config[ "Auth0:ClientSecret" ]
                       audience      = config[ "Auth0:ManagementApiAudience" ] |}
-        
-        let! res =
-            let url = "https://" + config["Auth0:Domain"] + "/oauth/token"
-            
-            client.PostAsJsonAsync( url, body ) |> Async.AwaitTask
+                
+        let! res = execHttpPostReq
+                    ( "https://" + config["Auth0:Domain"] + "/oauth/token" )
+                    body
 
-        let returnVal = match res.StatusCode with
-                        | HttpStatusCode.OK           -> Ok    res
-                        | HttpStatusCode.Unauthorized -> Error res.ReasonPhrase
-                        | _                           -> Error "Unexpected response from Auth0"
-                        
-        return returnVal // async.map? fstools?
+        match res with
+        | Ok x ->
+            return deserialize<Auth0TokenResponse> x Auth0TokenResponse.decoder
+                   |> Result.mapError ( fun _ -> DeserializeError "Failed to deserialize response" )
+        | Error err ->
+            return Error err
     } 
 
 
-let fetchUser ( config : IConfiguration ) ( token : string ) ( id : int ) =
+let fetchUser ( config : IConfiguration ) ( id : int ) ( token : string )  =
     task {
         use client = new HttpClient()
         
@@ -171,14 +140,23 @@ let fetchUser ( config : IConfiguration ) ( token : string ) ( id : int ) =
 
 let userQueryHandler ( userId : int ) : HttpHandler = 
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
-        let cache = ctx.GetService<IMemoryCache>()
+        async {
+            let cache = ctx.GetService<IMemoryCache>()
 
-        let token = getOrCreate<Auth0Response> 
-                        cache 
-                        CacheKey.token
-                        ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
-                        ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
+            let user = fetchUser
+                        ( ctx.GetService<IConfiguration>() )
+                        userId
+            
+            let! token = getOrCreate<Auth0TokenResponse> 
+                            cache 
+                            CacheKey.token
+                            ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
+                            ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
+                            >> user
+            match fetchUser token with
+            
 
-        match auth' with
-        | Error _ -> ServerErrors.INTERNAL_ERROR "Couldn't auhorise with Auth0" next ctx
-        | Ok    x -> Successful.OK               x next ctx
+            match auth' with
+            | Error _ -> ServerErrors.INTERNAL_ERROR "Couldn't auhorise with Auth0" next ctx
+            | Ok    x -> Successful.OK               x next ctx
+        }

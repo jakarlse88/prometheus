@@ -84,15 +84,18 @@ module ASCIIString =
     let private getValueEmptyErrorMsg fieldName =
         sprintf "'%s' cannot not be empty" fieldName
         
+        
     /// Get a formatted error message for a too long value creation error
     let private getValueTooLongErrorMsg fieldName len =
         sprintf "'%s' cannot exceed 50 characters in length, " fieldName
         |> ( + ) ( sprintf "but the provided had a length of '%i'" len )
         
+
     /// Get a formatted error message for an illegal character creation error
     let private getIllegalCharErrorMsg fieldName =
         sprintf "%s can only contain ASCII characters, parentheses, and dashes" fieldName
         
+
     /// Extract value
     let value ( ASCIIString str ) =
         str
