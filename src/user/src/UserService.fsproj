@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Types.fs" />
+    <Compile Include="Domain.fs" />
     <Compile Include="UserQuery.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

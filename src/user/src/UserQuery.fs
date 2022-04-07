@@ -116,19 +116,24 @@ let getAuthToken ( config : IConfiguration ) : Async<Result<Auth0TokenResponse, 
                     body
 
         match res with
+        | Error err ->
+            return Error err
         | Ok x ->
             return deserialize<Auth0TokenResponse> x Auth0TokenResponse.decoder
                    |> Result.mapError ( fun _ -> DeserializeError "Failed to deserialize response" )
-        | Error err ->
-            return Error err
     } 
 
 
-let fetchUser ( config : IConfiguration ) ( id : int ) ( token : string )  =
-    task {
+let fetchUser ( config : IConfiguration ) ( id : UserId ) ( token : string )  =
+    async {
         use client = new HttpClient()
         
+        client.DefaultRequestHeaders.Add( "Authorization", "Bearer " + token )
+        
         let! res = client.GetAsync( "https://" + config["Auth0:Domain"] + "/api/v2/users/" + id.ToString() )
+        
+        match res with
+        |
     }
 
 
@@ -138,11 +143,13 @@ let fetchUser ( config : IConfiguration ) ( id : int ) ( token : string )  =
 //
 // ---------------------------------------------------------------------------------------------------------------------------
 
-let userQueryHandler ( userId : int ) : HttpHandler = 
+let userQueryHandler ( userId : string ) : HttpHandler = 
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
         async {
             let cache = ctx.GetService<IMemoryCache>()
 
+            let userId' = UserId.create userId
+            
             let user = fetchUser
                         ( ctx.GetService<IConfiguration>() )
                         userId
@@ -152,7 +159,9 @@ let userQueryHandler ( userId : int ) : HttpHandler =
                             CacheKey.token
                             ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
                             ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
-                            >> user
+                            
+                            
+                            
             match fetchUser token with
             
 
