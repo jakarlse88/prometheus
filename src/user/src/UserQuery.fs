@@ -14,11 +14,11 @@ open Thoth.Json.Net
 open UserService.Types
 
 
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 //
 //      Infrastructure
 //
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 module CacheKey =
 
@@ -57,11 +57,11 @@ let waitAndRetryPolicy =
         ]
 
 
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 //
 //      Functions
 //
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 let deserialize<'T> ( input : HttpResponseMessage ) ( decoder : Decoder<'T> ): Result<'T, DomainError> =
     Decode.fromString decoder ( input.Content.ReadAsStringAsync().Result )
@@ -76,10 +76,12 @@ let httpResponseToResult ( response : HttpResponseMessage ) =
     | _                           -> Error ( NetworkError response.ReasonPhrase )
 
 
-let execHttpGetReq ( url : string ) : Async<Result<HttpResponseMessage, DomainError>> =
+let execHttpGetReq ( token : string ) ( url : string ) : Async<Result<HttpResponseMessage, DomainError>> =
     async {
         try 
             use client = new HttpClient()
+            
+            client.DefaultRequestHeaders.Add( "Authorization", "Bearer" + " " + token )
 
             let! res = waitAndRetryPolicy.Execute ( fun _ -> client.GetAsync( url ) |> Async.AwaitTask ) 
 
@@ -124,48 +126,55 @@ let getAuthToken ( config : IConfiguration ) : Async<Result<Auth0TokenResponse, 
     } 
 
 
-let fetchUser ( config : IConfiguration ) ( id : UserId ) ( token : string )  =
+let fetchUser ( config : IConfiguration ) ( token : AccessToken ) ( id : UserId )   =
     async {
-        use client = new HttpClient()
+        let req = AccessToken.value token |> execHttpGetReq  
         
-        client.DefaultRequestHeaders.Add( "Authorization", "Bearer " + token )
-        
-        let! res = client.GetAsync( "https://" + config["Auth0:Domain"] + "/api/v2/users/" + id.ToString() )
+        let! res = ( "https://" + config["Auth0:Domain"] + "/api/v2/users/" + id.ToString() )
+                    |> req
         
         match res with
-        |
+        | Error err ->
+            return Error err
+        | Ok x ->
+            return deserialize<Auth0User> x Auth0UserResponse.decoder
+                    |> Result.mapError ( fun _ -> DeserializeError "Failed to deserialize response" )
     }
 
 
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 //
 //      Workflow entrypoint
 //
-// ---------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
-let userQueryHandler ( userId : string ) : HttpHandler = 
+let userQueryHandler ( userId : int ) : HttpHandler = 
     fun ( next : HttpFunc ) ( ctx : HttpContext ) ->
-        async {
-            let cache = ctx.GetService<IMemoryCache>()
-
-            let userId' = UserId.create userId
-            
-            let user = fetchUser
-                        ( ctx.GetService<IConfiguration>() )
-                        userId
-            
-            let! token = getOrCreate<Auth0TokenResponse> 
-                            cache 
-                            CacheKey.token
-                            ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
-                            ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
-                            
-                            
-                            
-            match fetchUser token with
-            
-
-            match auth' with
-            | Error _ -> ServerErrors.INTERNAL_ERROR "Couldn't auhorise with Auth0" next ctx
-            | Ok    x -> Successful.OK               x next ctx
-        }
+        let userId' = UserId.create ( userId.ToString() )
+        
+        match userId' with
+        | Error err ->
+            ServerErrors.INTERNAL_ERROR err next ctx
+        | Ok id ->
+            let tokenResult = getOrCreate<Auth0TokenResponse> 
+                                ( ctx.GetService<IMemoryCache>() ) 
+                                CacheKey.token
+                                ( Absolute ( DateTimeOffset.Now + TimeSpan.FromSeconds ( 3600 ) ) ) 
+                                ( ( ctx.GetService<IConfiguration>() ) |> getAuthToken )
+                              |> Async.RunSynchronously
+                        
+            match tokenResult with
+            | Error err ->
+                ServerErrors.INTERNAL_ERROR err next ctx
+            | Ok token ->
+                let userRes = fetchUser
+                                ( ctx.GetService<IConfiguration>() )
+                                token.AccessToken
+                                id
+                              |> Async.RunSynchronously
+                           
+                match userRes with
+                | Error err ->
+                    ServerErrors.INTERNAL_ERROR err next ctx
+                | Ok user ->
+                    Successful.OK ( UserId.value user.UserId ) next ctx

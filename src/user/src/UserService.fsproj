@@ -6,12 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="RailwayResult.fs" />
+    <Compile Include="HttpModule.fs" />
     <Compile Include="Domain.fs" />
     <Compile Include="UserQuery.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Chessie" Version="0.6.0" />
     <PackageReference Include="Giraffe" Version="5.0.0" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
